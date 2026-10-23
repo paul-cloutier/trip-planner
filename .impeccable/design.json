@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-23T20:57:12+00:00",
+  "generatedAt": "2026-10-23T23:30:27+00:00",
   "title": "Design System: Trips",
   "extensions": {
     "colorMeta": {
@@ -66,7 +66,7 @@
       },
       "fill": {
         "role": "neutral",
-        "displayName": "Control Fill",
+        "displayName": "Pressed Row Fill",
         "canonical": "oklch(93.5% 0.007 286)",
         "tonalRamp": [
           "oklch(15% 0.007 286)",
@@ -423,6 +423,276 @@
           "oklch(84% 0.000 90)",
           "oklch(95% 0.000 90)"
         ]
+      },
+      "material": {
+        "role": "neutral",
+        "displayName": "Sheet Material",
+        "canonical": "oklch(100.0% 0.000 0 / 0.74)",
+        "tonalRamp": [
+          "oklch(15% 0.000 0)",
+          "oklch(26% 0.000 0)",
+          "oklch(38% 0.000 0)",
+          "oklch(49% 0.000 0)",
+          "oklch(61% 0.000 0)",
+          "oklch(72% 0.000 0)",
+          "oklch(84% 0.000 0)",
+          "oklch(95% 0.000 0)"
+        ]
+      },
+      "material-dark": {
+        "role": "neutral",
+        "displayName": "Sheet Material (dark mode)",
+        "canonical": "oklch(22.7% 0.004 286 / 0.92)",
+        "tonalRamp": [
+          "oklch(15% 0.002 286)",
+          "oklch(26% 0.003 286)",
+          "oklch(38% 0.004 286)",
+          "oklch(49% 0.004 286)",
+          "oklch(61% 0.004 286)",
+          "oklch(72% 0.004 286)",
+          "oklch(84% 0.003 286)",
+          "oklch(95% 0.002 286)"
+        ]
+      },
+      "pressed-top": {
+        "role": "primary",
+        "displayName": "Pressed Blue (top stop)",
+        "canonical": "oklch(55.5% 0.178 256)",
+        "tonalRamp": [
+          "oklch(15% 0.071 256)",
+          "oklch(26% 0.143 256)",
+          "oklch(38% 0.178 256)",
+          "oklch(49% 0.178 256)",
+          "oklch(61% 0.178 256)",
+          "oklch(72% 0.178 256)",
+          "oklch(84% 0.143 256)",
+          "oklch(95% 0.071 256)"
+        ]
+      },
+      "control-top": {
+        "role": "neutral",
+        "displayName": "Control Top",
+        "canonical": "oklch(95.9% 0.005 286)",
+        "tonalRamp": [
+          "oklch(15% 0.002 286)",
+          "oklch(26% 0.004 286)",
+          "oklch(38% 0.005 286)",
+          "oklch(49% 0.005 286)",
+          "oklch(61% 0.005 286)",
+          "oklch(72% 0.005 286)",
+          "oklch(84% 0.004 286)",
+          "oklch(95% 0.002 286)"
+        ]
+      },
+      "control-bottom": {
+        "role": "neutral",
+        "displayName": "Control Bottom",
+        "canonical": "oklch(92.9% 0.007 286)",
+        "tonalRamp": [
+          "oklch(15% 0.003 286)",
+          "oklch(26% 0.005 286)",
+          "oklch(38% 0.007 286)",
+          "oklch(49% 0.007 286)",
+          "oklch(61% 0.007 286)",
+          "oklch(72% 0.007 286)",
+          "oklch(84% 0.005 286)",
+          "oklch(95% 0.003 286)"
+        ]
+      },
+      "card-top": {
+        "role": "neutral",
+        "displayName": "Card Top",
+        "canonical": "oklch(97.7% 0.004 286)",
+        "tonalRamp": [
+          "oklch(15% 0.002 286)",
+          "oklch(26% 0.003 286)",
+          "oklch(38% 0.004 286)",
+          "oklch(49% 0.004 286)",
+          "oklch(61% 0.004 286)",
+          "oklch(72% 0.004 286)",
+          "oklch(84% 0.003 286)",
+          "oklch(95% 0.002 286)"
+        ]
+      },
+      "card-bottom": {
+        "role": "neutral",
+        "displayName": "Card Bottom",
+        "canonical": "oklch(95.7% 0.007 286)",
+        "tonalRamp": [
+          "oklch(15% 0.003 286)",
+          "oklch(26% 0.005 286)",
+          "oklch(38% 0.007 286)",
+          "oklch(49% 0.007 286)",
+          "oklch(61% 0.007 286)",
+          "oklch(72% 0.007 286)",
+          "oklch(84% 0.005 286)",
+          "oklch(95% 0.003 286)"
+        ]
+      },
+      "raised-top": {
+        "role": "neutral",
+        "displayName": "Raised Top",
+        "canonical": "oklch(100.0% 0.000 0)",
+        "tonalRamp": [
+          "oklch(15% 0.000 0)",
+          "oklch(26% 0.000 0)",
+          "oklch(38% 0.000 0)",
+          "oklch(49% 0.000 0)",
+          "oklch(61% 0.000 0)",
+          "oklch(72% 0.000 0)",
+          "oklch(84% 0.000 0)",
+          "oklch(95% 0.000 0)"
+        ]
+      },
+      "raised-bottom": {
+        "role": "neutral",
+        "displayName": "Raised Bottom",
+        "canonical": "oklch(98.9% 0.003 286)",
+        "tonalRamp": [
+          "oklch(15% 0.001 286)",
+          "oklch(26% 0.002 286)",
+          "oklch(38% 0.003 286)",
+          "oklch(49% 0.003 286)",
+          "oklch(61% 0.003 286)",
+          "oklch(72% 0.003 286)",
+          "oklch(84% 0.002 286)",
+          "oklch(95% 0.001 286)"
+        ]
+      },
+      "column-bottom": {
+        "role": "neutral",
+        "displayName": "Column Bottom",
+        "canonical": "oklch(98.0% 0.004 286)",
+        "tonalRamp": [
+          "oklch(15% 0.002 286)",
+          "oklch(26% 0.003 286)",
+          "oklch(38% 0.004 286)",
+          "oklch(49% 0.004 286)",
+          "oklch(61% 0.004 286)",
+          "oklch(72% 0.004 286)",
+          "oklch(84% 0.003 286)",
+          "oklch(95% 0.002 286)"
+        ]
+      },
+      "control-top-dark": {
+        "role": "neutral",
+        "displayName": "Control Top (dark mode)",
+        "canonical": "oklch(32.6% 0.005 286)",
+        "tonalRamp": [
+          "oklch(15% 0.002 286)",
+          "oklch(26% 0.004 286)",
+          "oklch(38% 0.005 286)",
+          "oklch(49% 0.005 286)",
+          "oklch(61% 0.005 286)",
+          "oklch(72% 0.005 286)",
+          "oklch(84% 0.004 286)",
+          "oklch(95% 0.002 286)"
+        ]
+      },
+      "control-bottom-dark": {
+        "role": "neutral",
+        "displayName": "Control Bottom (dark mode)",
+        "canonical": "oklch(28.6% 0.005 286)",
+        "tonalRamp": [
+          "oklch(15% 0.002 286)",
+          "oklch(26% 0.004 286)",
+          "oklch(38% 0.005 286)",
+          "oklch(49% 0.005 286)",
+          "oklch(61% 0.005 286)",
+          "oklch(72% 0.005 286)",
+          "oklch(84% 0.004 286)",
+          "oklch(95% 0.002 286)"
+        ]
+      },
+      "card-top-dark": {
+        "role": "neutral",
+        "displayName": "Card Top (dark mode)",
+        "canonical": "oklch(31.8% 0.005 286)",
+        "tonalRamp": [
+          "oklch(15% 0.002 286)",
+          "oklch(26% 0.004 286)",
+          "oklch(38% 0.005 286)",
+          "oklch(49% 0.005 286)",
+          "oklch(61% 0.005 286)",
+          "oklch(72% 0.005 286)",
+          "oklch(84% 0.004 286)",
+          "oklch(95% 0.002 286)"
+        ]
+      },
+      "card-bottom-dark": {
+        "role": "neutral",
+        "displayName": "Card Bottom (dark mode)",
+        "canonical": "oklch(29.4% 0.005 286)",
+        "tonalRamp": [
+          "oklch(15% 0.002 286)",
+          "oklch(26% 0.004 286)",
+          "oklch(38% 0.005 286)",
+          "oklch(49% 0.005 286)",
+          "oklch(61% 0.005 286)",
+          "oklch(72% 0.005 286)",
+          "oklch(84% 0.004 286)",
+          "oklch(95% 0.002 286)"
+        ]
+      },
+      "raised-top-dark": {
+        "role": "neutral",
+        "displayName": "Raised Top (dark mode)",
+        "canonical": "oklch(41.1% 0.007 286)",
+        "tonalRamp": [
+          "oklch(15% 0.003 286)",
+          "oklch(26% 0.005 286)",
+          "oklch(38% 0.007 286)",
+          "oklch(49% 0.007 286)",
+          "oklch(61% 0.007 286)",
+          "oklch(72% 0.007 286)",
+          "oklch(84% 0.005 286)",
+          "oklch(95% 0.003 286)"
+        ]
+      },
+      "raised-bottom-dark": {
+        "role": "neutral",
+        "displayName": "Raised Bottom (dark mode)",
+        "canonical": "oklch(36.5% 0.007 286)",
+        "tonalRamp": [
+          "oklch(15% 0.003 286)",
+          "oklch(26% 0.005 286)",
+          "oklch(38% 0.007 286)",
+          "oklch(49% 0.007 286)",
+          "oklch(61% 0.007 286)",
+          "oklch(72% 0.007 286)",
+          "oklch(84% 0.005 286)",
+          "oklch(95% 0.003 286)"
+        ]
+      },
+      "column-top-dark": {
+        "role": "neutral",
+        "displayName": "Column Top (dark mode)",
+        "canonical": "oklch(24.1% 0.006 286)",
+        "tonalRamp": [
+          "oklch(15% 0.002 286)",
+          "oklch(26% 0.005 286)",
+          "oklch(38% 0.006 286)",
+          "oklch(49% 0.006 286)",
+          "oklch(61% 0.006 286)",
+          "oklch(72% 0.006 286)",
+          "oklch(84% 0.005 286)",
+          "oklch(95% 0.002 286)"
+        ]
+      },
+      "column-bottom-dark": {
+        "role": "neutral",
+        "displayName": "Column Bottom (dark mode)",
+        "canonical": "oklch(21.4% 0.004 286)",
+        "tonalRamp": [
+          "oklch(15% 0.002 286)",
+          "oklch(26% 0.003 286)",
+          "oklch(38% 0.004 286)",
+          "oklch(49% 0.004 286)",
+          "oklch(61% 0.004 286)",
+          "oklch(72% 0.004 286)",
+          "oklch(84% 0.003 286)",
+          "oklch(95% 0.002 286)"
+        ]
       }
     },
     "typographyMeta": {
@@ -462,14 +732,29 @@
         "purpose": "Phone sheet over the map. Dark: 0 -1px 0 rgb(255 255 255 / 0.06), 0 -8px 28px rgb(0 0 0 / 0.5)."
       },
       {
-        "name": "segment-lift",
-        "value": "0 1px 3px rgb(0 0 0 / 0.12)",
-        "purpose": "Selected segment in the segmented control."
+        "name": "material-edge",
+        "value": "inset 0 1px 0 rgb(255 255 255 / 0.9)",
+        "purpose": "Lit top edge of the frosted sheet, layered before the sheet shadow. Dark: white at 0.1."
+      },
+      {
+        "name": "control-edge",
+        "value": "inset 0 1px 0 rgb(255 255 255 / 0.85), inset 0 -0.5px 0 rgb(0 0 0 / 0.05)",
+        "purpose": "Resting controls, the note card and the trip pill. Dark: inset 0 1px 0 rgb(255 255 255 / 0.07), inset 0 -0.5px 0 rgb(0 0 0 / 0.3)."
+      },
+      {
+        "name": "pressed-edge",
+        "value": "inset 0 1px 0 rgb(255 255 255 / 0.22), 0 3px 10px -3px rgb(0 98 204 / 0.55)",
+        "purpose": "Active chips and the primary button. Dark: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 3px 10px -3px rgb(0 0 0 / 0.6)."
+      },
+      {
+        "name": "raised-edge",
+        "value": "0 1px 2px rgb(0 0 0 / 0.1), 0 3px 8px -2px rgb(0 0 0 / 0.12)",
+        "purpose": "Selected segment. Dark: 0 1px 2px rgb(0 0 0 / 0.4), 0 3px 8px -2px rgb(0 0 0 / 0.4)."
       },
       {
         "name": "map-control",
         "value": "0 2px 10px rgb(0 0 0 / 0.14)",
-        "purpose": "Mapbox zoom control group."
+        "purpose": "Mapbox zoom control group (solid background, 12px radius)."
       },
       {
         "name": "pin-shadow",
@@ -516,24 +801,61 @@
         "text": "#fff"
       },
       "baseStyle": "mapbox standard, faded theme, day/night lightPreset following the system live; POI and transit labels and 3D objects off; our layers at emissive strength 1"
-    }
+    },
+    "materials": [
+      {
+        "name": "material",
+        "value": "background-color: rgb(255 255 255 / 0.74); backdrop-filter: blur(24px) saturate(180%)",
+        "purpose": "Phone sheet only. Dark: rgb(28 28 30 / 0.92) with blur(24px), near-opaque so the navy night map does not tint it; frost visible in light mode only. Solid var(--background) when backdrop-filter is unsupported."
+      },
+      {
+        "name": "column",
+        "value": "linear-gradient(180deg, #ffffff 0%, #f8f8fb 100%)",
+        "purpose": "Laptop column, solid, never frosted. Dark: #1f1f22 to #19191b."
+      },
+      {
+        "name": "control",
+        "value": "linear-gradient(180deg, #f1f1f5 0%, #e7e7ec 100%)",
+        "purpose": "Resting chips, fields, segmented track, close, city and secondary buttons. Dark: #343437 to #2a2a2d."
+      },
+      {
+        "name": "card",
+        "value": "linear-gradient(180deg, #f7f7fa 0%, #f0f0f5 100%)",
+        "purpose": "Note card. Dark: #323235 to #2c2c2f."
+      },
+      {
+        "name": "pressed",
+        "value": "linear-gradient(180deg, #1670d8 0%, #0062cc 100%)",
+        "purpose": "Active chips and primary button, white text at 4.5:1+; same in both modes, distinct from the dark link blue #3b9bff."
+      },
+      {
+        "name": "raised",
+        "value": "linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%)",
+        "purpose": "Selected segment. Dark: #4a4a4e to #3e3e42."
+      },
+      {
+        "name": "dot",
+        "value": "radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.55), transparent 60%), var(--dot); box-shadow: inset 0 -1px 1.5px rgb(0 0 0 / 0.18)",
+        "purpose": "List and chip category dots. Map pins stay flat."
+      }
+    ]
   },
   "components": [
     {
       "name": "Filter Chip",
       "kind": "chip",
       "refersTo": "chip",
-      "description": "Pill filter and category picker; blue when pressed, category dot inside.",
-      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M21 3 3 10.5l7.5 3L13.5 21z\"/></svg>Nearby</button><button class=\"ds-chip\" aria-pressed=\"false\">Want</button><button class=\"ds-chip\" aria-pressed=\"false\"><span class=\"ds-dot\" style=\"background:#e4572e\"></span>Eat</button><button class=\"ds-chip\" aria-pressed=\"true\"><span class=\"ds-dot\" style=\"background:#d6336c\"></span>See</button></div>",
-      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-chips{display:flex;gap:8px;flex-wrap:wrap} .ds-chip{display:flex;align-items:center;gap:6px;height:36px;padding:0 14px;border:0;border-radius:9999px;background:var(--fill,#e9e9ee);color:var(--foreground,#1c1c1e);font:500 15px/1 inherit;font-family:inherit;cursor:pointer} .ds-chip[aria-pressed=true]{background:var(--accent,#0062cc);color:#fff} .ds-chip:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:2px} .ds-dot{width:10px;height:10px;border-radius:9999px;box-shadow:0 0 0 1px rgb(255 255 255/.7)} .ds-chip[aria-pressed=true] .ds-dot{box-shadow:0 0 0 1.5px #fff}"
+      "description": "Pill filter and category picker in control material; pressed blue when active, lit category dot inside.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M21 3 3 10.5l7.5 3L13.5 21z\"/></svg>Nearby</button><button class=\"ds-chip\" aria-pressed=\"false\">Want</button><button class=\"ds-chip\" aria-pressed=\"false\"><span class=\"ds-dot\" style=\"--dot:#e4572e\"></span>Eat</button><button class=\"ds-chip\" aria-pressed=\"true\"><span class=\"ds-dot\" style=\"--dot:#d6336c\"></span>See</button></div>",
+      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-chips{display:flex;gap:8px;flex-wrap:wrap} .ds-chip{display:flex;align-items:center;gap:6px;height:36px;padding:0 14px;border:0;border-radius:9999px;background-image:var(--control,linear-gradient(180deg,#f1f1f5,#e7e7ec));box-shadow:var(--control-edge,inset 0 1px 0 rgb(255 255 255/.85),inset 0 -0.5px 0 rgb(0 0 0/.05));color:var(--foreground,#1c1c1e);font:500 15px/1 inherit;font-family:inherit;cursor:pointer} .ds-chip[aria-pressed=true]{background-image:var(--pressed,linear-gradient(180deg,#1670d8,#0062cc));box-shadow:var(--pressed-edge,inset 0 1px 0 rgb(255 255 255/.22),0 3px 10px -3px rgb(0 98 204/.55));color:#fff} .ds-chip:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:2px} .ds-dot{width:10px;height:10px;border-radius:9999px;background:radial-gradient(circle at 35% 30%,rgb(255 255 255/.55),transparent 60%),var(--dot);box-shadow:inset 0 -1px 1.5px rgb(0 0 0/.18),0 0 0 1px rgb(255 255 255/.7)} .ds-chip[aria-pressed=true] .ds-dot{box-shadow:inset 0 -1px 1.5px rgb(0 0 0/.18),0 0 0 1.5px #fff}"
     },
     {
       "name": "Search Field",
       "kind": "input",
       "refersTo": "search-field",
-      "description": "Fill-grey search field under the sheet title.",
+      "description": "Control-material search field under the sheet title.",
       "html": "<label class=\"ds-search\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" aria-hidden=\"true\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"m15.5 15.5 5 5\"/></svg><input type=\"search\" placeholder=\"Find a place to save, near here\" aria-label=\"Find a place to save\"></label>",
-      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-search{display:flex;align-items:center;height:40px;padding:0 10px;border-radius:10px;background:var(--fill,#e9e9ee);color:var(--secondary,#636366)} .ds-search input{flex:1;min-width:0;border:0;background:transparent;padding-left:8px;font:400 17px inherit;font-family:inherit;color:var(--foreground,#1c1c1e);outline:none;caret-color:var(--accent,#0062cc)} .ds-search input::placeholder{color:var(--secondary,#636366)} .ds-search:focus-within{box-shadow:0 0 0 2px var(--accent,#0062cc)}"
+      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-search{display:flex;align-items:center;height:40px;padding:0 10px;border-radius:12px;background-image:var(--control,linear-gradient(180deg,#f1f1f5,#e7e7ec));box-shadow:var(--control-edge,inset 0 1px 0 rgb(255 255 255/.85),inset 0 -0.5px 0 rgb(0 0 0/.05));color:var(--secondary,#636366)} .ds-search input{flex:1;min-width:0;border:0;background:transparent;padding-left:8px;font:400 17px inherit;font-family:inherit;color:var(--foreground,#1c1c1e);outline:none;caret-color:var(--accent,#0062cc)} .ds-search input::placeholder{color:var(--secondary,#636366)} .ds-search:focus-within{outline:2px solid var(--accent,#0062cc);outline-offset:2px}"
     },
     {
       "name": "Text Field",
@@ -541,23 +863,23 @@
       "refersTo": "text-field",
       "description": "Labelled note field in the detail view.",
       "html": "<label class=\"ds-field\"><span>Via: who or what recommended it</span><input value=\"Alana's sister\"></label>",
-      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-field{display:flex;flex-direction:column;gap:4px} .ds-field span{font-size:13px;color:var(--secondary,#636366)} .ds-field input{height:44px;padding:0 12px;border:0;border-radius:10px;background:var(--fill,#e9e9ee);font:400 17px inherit;font-family:inherit;color:var(--foreground,#1c1c1e);outline:none;caret-color:var(--accent,#0062cc)} .ds-field input:focus-visible{box-shadow:0 0 0 2px var(--accent,#0062cc)}"
+      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-field{display:flex;flex-direction:column;gap:4px} .ds-field span{font-size:13px;color:var(--secondary,#636366)} .ds-field input{height:44px;padding:0 12px;border:0;border-radius:12px;background-image:var(--control,linear-gradient(180deg,#f1f1f5,#e7e7ec));box-shadow:var(--control-edge,inset 0 1px 0 rgb(255 255 255/.85),inset 0 -0.5px 0 rgb(0 0 0/.05));font:400 17px inherit;font-family:inherit;color:var(--foreground,#1c1c1e);outline:none;caret-color:var(--accent,#0062cc)} .ds-field input:focus-visible{outline:2px solid var(--accent,#0062cc)}"
     },
     {
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Blue filled button for the one committing action.",
+      "description": "Pressed-blue material button for the one committing action.",
       "html": "<button class=\"ds-btn-primary\">Save</button>",
-      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-btn-primary{height:44px;min-width:160px;border:0;border-radius:10px;background:var(--accent,#0062cc);color:#fff;font:600 17px inherit;font-family:inherit;cursor:pointer} .ds-btn-primary:active{opacity:.8} .ds-btn-primary:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:2px}"
+      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-btn-primary{height:44px;min-width:160px;border:0;border-radius:12px;background-image:var(--pressed,linear-gradient(180deg,#1670d8,#0062cc));box-shadow:var(--pressed-edge,inset 0 1px 0 rgb(255 255 255/.22),0 3px 10px -3px rgb(0 98 204/.55));color:#fff;font:600 17px inherit;font-family:inherit;cursor:pointer} .ds-btn-primary:active{opacity:.8} .ds-btn-primary:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:2px}"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "Fill-grey button with blue text, paired with the primary.",
+      "description": "Control-material button with blue text, paired with the primary.",
       "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
-      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-btn-secondary{height:44px;min-width:160px;border:0;border-radius:10px;background:var(--fill,#e9e9ee);color:var(--accent,#0062cc);font:400 17px inherit;font-family:inherit;cursor:pointer} .ds-btn-secondary:active{opacity:.7} .ds-btn-secondary:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:2px}"
+      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-btn-secondary{height:44px;min-width:160px;border:0;border-radius:12px;background-image:var(--control,linear-gradient(180deg,#f1f1f5,#e7e7ec));box-shadow:var(--control-edge,inset 0 1px 0 rgb(255 255 255/.85),inset 0 -0.5px 0 rgb(0 0 0/.05));color:var(--accent,#0062cc);font:400 17px inherit;font-family:inherit;cursor:pointer} .ds-btn-secondary:active{opacity:.7} .ds-btn-secondary:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:2px}"
     },
     {
       "name": "Text Button",
@@ -571,50 +893,58 @@
       "name": "Segmented Control",
       "kind": "custom",
       "refersTo": "segmented-control",
-      "description": "Want/Been switch in the place detail.",
+      "description": "Want/Been switch in the place detail: control track, raised selected segment.",
       "html": "<div class=\"ds-seg\" role=\"group\" aria-label=\"Want or been\"><button aria-pressed=\"true\">Want to go</button><button aria-pressed=\"false\">Been</button></div>",
-      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-seg{display:grid;grid-template-columns:1fr 1fr;padding:2px;border-radius:9px;background:var(--fill,#e9e9ee);width:320px} .ds-seg button{height:32px;border:0;border-radius:7px;background:transparent;font:500 15px inherit;font-family:inherit;color:var(--foreground,#1c1c1e);cursor:pointer} .ds-seg button[aria-pressed=true]{background:var(--background,#fff);font-weight:600;box-shadow:0 1px 3px rgb(0 0 0/.12)} .ds-seg button:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:2px}"
+      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-seg{display:grid;grid-template-columns:1fr 1fr;padding:2px;border-radius:11px;background-image:var(--control,linear-gradient(180deg,#f1f1f5,#e7e7ec));box-shadow:var(--control-edge,inset 0 1px 0 rgb(255 255 255/.85),inset 0 -0.5px 0 rgb(0 0 0/.05));width:320px} .ds-seg button{height:32px;border:0;border-radius:9px;background:transparent;font:500 15px inherit;font-family:inherit;color:var(--foreground,#1c1c1e);cursor:pointer} .ds-seg button[aria-pressed=true]{background-image:var(--raised,linear-gradient(180deg,#fff,#fbfbfd));box-shadow:var(--raised-edge,0 1px 2px rgb(0 0 0/.1),0 3px 8px -2px rgb(0 0 0/.12));font-weight:600} .ds-seg button:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:2px}"
     },
     {
       "name": "Place Row",
       "kind": "custom",
       "refersTo": "list-row",
       "description": "Pool list row: category dot, name, metadata line, distance; inset hairline.",
-      "html": "<ul class=\"ds-list\"><li><button class=\"ds-row\"><span class=\"ds-lead\"><span class=\"ds-rdot\" style=\"background:#d6336c\"></span></span><span class=\"ds-body\"><span class=\"ds-text\"><span class=\"ds-name\">Pantheon</span><span class=\"ds-meta\">See</span></span><span class=\"ds-dist\">10 m</span></span></button></li><li><button class=\"ds-row\"><span class=\"ds-lead\"><span class=\"ds-rdot\" style=\"background:#e4572e\"></span></span><span class=\"ds-body\"><span class=\"ds-text\"><span class=\"ds-name\">Armando al Pantheon</span><span class=\"ds-meta\">Eat · Been</span></span><span class=\"ds-dist\">80 m</span></span></button></li></ul>",
-      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-list{list-style:none;margin:0;padding:0;width:375px;border-top:1px solid var(--separator,#dcdce1);background:var(--background,#fff)} .ds-row{display:flex;width:100%;align-items:stretch;border:0;background:transparent;padding:0;text-align:left;font-family:inherit;cursor:pointer;color:var(--foreground,#1c1c1e)} .ds-row:hover,.ds-row:focus-visible{background:var(--grouped,#f2f2f7)} .ds-row:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:-2px} .ds-row:active{background:var(--fill,#e9e9ee)} .ds-lead{display:flex;width:40px;flex-shrink:0;align-items:center;justify-content:center;padding-left:4px} .ds-rdot{width:12px;height:12px;border-radius:9999px} .ds-body{display:flex;flex:1;min-width:0;min-height:56px;align-items:center;gap:12px;padding:8px 16px 8px 0;border-bottom:1px solid var(--separator,#dcdce1)} .ds-text{flex:1;min-width:0} .ds-name{display:block;font-size:17px;line-height:1.375;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .ds-meta{display:block;font-size:15px;line-height:1.375;color:var(--secondary,#636366)} .ds-dist{font-size:15px;color:var(--secondary,#636366);font-variant-numeric:tabular-nums}"
+      "html": "<ul class=\"ds-list\"><li><button class=\"ds-row\"><span class=\"ds-lead\"><span class=\"ds-rdot\" style=\"--dot:#d6336c\"></span></span><span class=\"ds-body\"><span class=\"ds-text\"><span class=\"ds-name\">Pantheon</span><span class=\"ds-meta\">See</span></span><span class=\"ds-dist\">10 m</span></span></button></li><li><button class=\"ds-row\"><span class=\"ds-lead\"><span class=\"ds-rdot\" style=\"--dot:#e4572e\"></span></span><span class=\"ds-body\"><span class=\"ds-text\"><span class=\"ds-name\">Armando al Pantheon</span><span class=\"ds-meta\">Eat · Been</span></span><span class=\"ds-dist\">80 m</span></span></button></li></ul>",
+      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-list{list-style:none;margin:0;padding:0;width:375px;border-top:1px solid var(--separator,#dcdce1);background:var(--background,#fff)} .ds-row{display:flex;width:100%;align-items:stretch;border:0;background:transparent;padding:0;text-align:left;font-family:inherit;cursor:pointer;color:var(--foreground,#1c1c1e)} .ds-row:hover,.ds-row:focus-visible{background:var(--grouped,#f2f2f7)} .ds-row:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:-2px} .ds-row:active{background:var(--fill,#e9e9ee)} .ds-lead{display:flex;width:40px;flex-shrink:0;align-items:center;justify-content:center;padding-left:4px} .ds-rdot{width:12px;height:12px;border-radius:9999px;background:radial-gradient(circle at 35% 30%,rgb(255 255 255/.55),transparent 60%),var(--dot);box-shadow:inset 0 -1px 1.5px rgb(0 0 0/.18)} .ds-body{display:flex;flex:1;min-width:0;min-height:56px;align-items:center;gap:12px;padding:8px 16px 8px 0;border-bottom:1px solid var(--separator,#dcdce1)} .ds-text{flex:1;min-width:0} .ds-name{display:block;font-size:17px;line-height:1.375;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .ds-meta{display:block;font-size:15px;line-height:1.375;color:var(--secondary,#636366)} .ds-dist{font-size:15px;color:var(--secondary,#636366);font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Note Card",
+      "kind": "card",
+      "refersTo": "note-card",
+      "description": "Card-material note with the control edge.",
+      "html": "<div class=\"ds-note\"><p><span>Added by</span> Alana</p><p>Untouristy house with amazing art</p></div>",
+      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-note{width:340px;padding:12px 14px;border-radius:14px;background-image:var(--card,linear-gradient(180deg,#f7f7fa,#f0f0f5));box-shadow:var(--control-edge,inset 0 1px 0 rgb(255 255 255/.85),inset 0 -0.5px 0 rgb(0 0 0/.05));font-size:17px;color:var(--foreground,#1c1c1e)} .ds-note p{margin:0} .ds-note p+p{margin-top:8px} .ds-note span{color:var(--secondary,#636366)}"
     },
     {
       "name": "Sheet Header",
       "kind": "nav",
       "refersTo": "sheet",
-      "description": "Top of the phone sheet: grabber, large title with the Trips link.",
+      "description": "Top of the phone sheet: frosted material, grabber, large title with the Trips link.",
       "html": "<div class=\"ds-sheet\"><div class=\"ds-grab\"><span></span></div><div class=\"ds-head\"><h1>Our places</h1><a href=\"#\">Trips</a></div></div>",
-      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-sheet{width:375px;border-radius:14px 14px 0 0;background:var(--background,#fff);box-shadow:0 -1px 0 rgb(0 0 0/.04),0 -8px 28px rgb(0 0 0/.12);padding-bottom:12px} .ds-grab{display:flex;height:20px;align-items:center;justify-content:center} .ds-grab span{width:36px;height:5px;border-radius:9999px;background:var(--separator,#dcdce1)} .ds-head{display:flex;align-items:baseline;justify-content:space-between;padding:0 16px} .ds-head h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-0.01em;color:var(--foreground,#1c1c1e)} .ds-head a{font-size:17px;color:var(--accent,#0062cc);text-decoration:none} .ds-head a:hover{opacity:.7} .ds-head a:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:2px}"
+      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-sheet{width:375px;border-radius:22px 22px 0 0;background-color:var(--background,#fff);box-shadow:var(--material-edge,inset 0 1px 0 rgb(255 255 255/.9)),0 -1px 0 rgb(0 0 0/.04),0 -8px 28px rgb(0 0 0/.12);padding-bottom:12px} @supports (backdrop-filter:blur(1px)){.ds-sheet{background-color:var(--material,rgb(255 255 255/.74));backdrop-filter:var(--material-filter,blur(24px) saturate(180%))}} .ds-grab{display:flex;height:20px;align-items:center;justify-content:center} .ds-grab span{width:36px;height:5px;border-radius:9999px;background:var(--separator,#dcdce1)} .ds-head{display:flex;align-items:baseline;justify-content:space-between;padding:0 16px} .ds-head h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-0.01em;color:var(--foreground,#1c1c1e)} .ds-head a{font-size:17px;color:var(--accent,#0062cc);text-decoration:none} .ds-head a:hover{opacity:.7} .ds-head a:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:2px}"
     },
     {
       "name": "Trip Pill",
       "kind": "chip",
       "refersTo": "chip-trip",
-      "description": "Blue-wash pill for a trip the place is already in.",
+      "description": "Blue-wash pill with the control edge, for a trip the place is already in.",
       "html": "<a class=\"ds-trip\" href=\"#\">In Italy France UK trip</a>",
-      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-trip{display:inline-flex;align-items:center;height:36px;padding:0 14px;border-radius:9999px;background:var(--accent-tint,#e5f0fc);color:var(--accent,#0062cc);font:500 15px inherit;font-family:inherit;text-decoration:none} .ds-trip:hover{opacity:.8} .ds-trip:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:2px}"
+      "css": ":host{font-family:-apple-system, BlinkMacSystemFont, \"SF Pro Text\", system-ui, sans-serif;} .ds-trip{display:inline-flex;align-items:center;height:36px;padding:0 14px;border-radius:9999px;background:var(--accent-tint,#e5f0fc);color:var(--accent,#0062cc);box-shadow:var(--control-edge,inset 0 1px 0 rgb(255 255 255/.85),inset 0 -0.5px 0 rgb(0 0 0/.05));font:500 15px inherit;font-family:inherit;text-decoration:none} .ds-trip:hover{opacity:.8} .ds-trip:focus-visible{outline:2px solid var(--accent,#0062cc);outline-offset:2px}"
     }
   ],
   "narrative": {
     "northStar": "The Native Maps App",
-    "overview": "Trips is meant to look like it shipped with the phone. The whole app follows the standard look of its category on purpose (PRODUCT.md, Brand Commitments): an iPhone and Mac maps app, with Apple Maps as the bar for craft. Conventions are kept, not reinvented. The care goes into getting the details right: Apple's system type, Apple's grouped greys, one system blue, hairline separators, a sheet you drag between three heights, and a segmented control.\n\nThe map is the main view and is not styled. Mapbox's light and dark base maps carry the place, and the app adds two things on top: category-coloured pins and the sheet (on a laptop, the list column). Everything chrome-like is quiet grey, so the only colours you notice are the category dots and the one blue that marks what is selected or tappable.\n\nThe layout is dense the way a native list is dense: 17px rows with a 15px line under them, 56px tall on a phone and 48px on a laptop, with separators that start where the text starts rather than under the dot.",
+    "overview": "Trips is meant to look like it shipped with the phone. The whole app follows the standard look of its category on purpose (PRODUCT.md, Brand Commitments): an iPhone and Mac maps app, with Apple Maps as the bar for craft. Conventions are kept, not reinvented. The care goes into getting the details right: Apple's system type, Apple's grouped greys, one system blue, hairline separators, a frosted sheet you drag between three heights, and a segmented control.\n\nThe map is the main view and is not styled. Mapbox's light and dark base maps carry the place, and the app adds two things on top: category-coloured pins and the sheet (on a laptop, the list column). Everything chrome-like is quiet grey with a little material: controls are lit softly from above, pressed and selected controls sit deeper or higher, and the phone sheet is frosted glass over the map. The only colours you notice are the category dots and the blue that marks what is selected or tappable.\n\nThe layout is dense the way a native list is dense: 17px rows with a 15px line under them, 56px tall on a phone and 48px on a laptop, with separators that start where the text starts rather than under the dot.",
     "keyCharacteristics": [
       "System sans everywhere (SF on Apple devices); there is no brand typeface.",
-      "Grouped-background greys for fills, one blue for selection, controls and links.",
+      "Grouped greys and top-lit control surfaces; blue for selection, controls and links.",
       "Category dots are the only other colour, on pins, rows and chips.",
       "Hairline separators, inset to the text.",
-      "A bottom sheet with a grabber and three heights on phones; a fixed 400px column on laptops.",
+      "A frosted bottom sheet with a grabber and three heights on phones; a fixed 400px solid column on laptops.",
       "Dark mode follows the system through the same named tokens."
     ],
     "rules": [
       {
         "name": "The One Blue Rule",
-        "body": "Blue means tappable or selected. Nothing decorative is blue, and nothing tappable gets a second accent colour.",
+        "body": "Blue means tappable or selected. Nothing decorative is blue, and nothing tappable gets a second accent colour. Pressed Blue is the same hue, deepened so white text stays legible; it is not a second accent.",
         "section": "colors"
       },
       {
@@ -638,24 +968,31 @@
         "section": "typography"
       },
       {
-        "name": "The Tonal First Rule",
-        "body": "Separate things with a fill step or a hairline before you reach for a shadow. Shadows belong to things that float over the map.",
+        "name": "The Lit From Above Rule",
+        "body": "Every control surface uses one of the material utilities (`control`, `card`, `pressed`, `raised`, `material`), never a flat fill plus a one-off shadow. They pair each gradient with its edge, and switch with state (`aria-pressed:pressed`, `aria-pressed:raised`).",
+        "section": "elevation"
+      },
+      {
+        "name": "The Neutral Glass Rule",
+        "body": "Frost must not tint the sheet. Over a coloured map, density beats translucency: keep dark material near-opaque and unsaturated.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "**Do** use the platform convention first; if Apple Maps or iOS has a standard control for it, use that look (segmented control, grouped list, sheet with grabber, fill-grey search field).",
-      "**Do** keep blue for selection, focus and tappable things only.",
-      "**Do** show categories as dots (12px in rows, 10px in chips, 8px-radius pins), not as text or fill colour.",
-      "**Do** use `--background`, `--grouped`, `--fill` and `--separator` for every surface so dark mode keeps working.",
+      "**Do** use the platform convention first; if Apple Maps or iOS has a standard control for it, use that look (segmented control, grouped list, frosted sheet with grabber, lit search field).",
+      "**Do** keep blue for selection, focus and tappable things only; use pressed blue for any blue fill carrying white text.",
+      "**Do** show categories as dots (12px in rows, 10px in chips, 8px-radius pins), not as text or fill colour; give list and chip dots the `dot` highlight and keep pins flat.",
+      "**Do** build surfaces from the material utilities (`control`, `card`, `pressed`, `raised`, `material`) and the `--background`, `--grouped`, `--fill` and `--separator` tokens so dark mode keeps working.",
+      "**Do** keep a solid fallback behind anything frosted.",
       "**Do** use the 17 / 15 / 13 px sizes and tabular numerals for distances and counts.",
       "**Do** put any new colour or accent change in `globals.css` and mirror it in `pool-map.tsx`."
     ],
     "donts": [
       "**Don't** add a brand typeface or display face; the app uses the system sans on purpose.",
       "**Don't** add a second accent colour or colour-coded fills.",
-      "**Don't** use borders around controls; separate with fill steps and hairlines.",
+      "**Don't** use borders around controls; separate with material edges, fill steps and hairlines.",
       "**Don't** add hard or offset shadows; the only shadows are the soft ones listed under Elevation & Depth.",
+      "**Don't** frost the laptop column or let the dark material tint toward the map.",
       "**Don't** add small uppercase labels above titles; section headings are plain 15px semibold words."
     ]
   }

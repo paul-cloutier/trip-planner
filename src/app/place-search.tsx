@@ -65,7 +65,7 @@ export default function PlaceSearch({
 
   return (
     <div>
-      <label className="relative flex h-10 items-center rounded-[10px] bg-fill px-2.5">
+      <label className="relative flex h-10 items-center rounded-control control px-2.5">
         <svg
           width="17"
           height="17"
