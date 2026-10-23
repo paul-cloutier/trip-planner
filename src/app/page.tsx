@@ -6,9 +6,10 @@ import PoolView from "./pool-view";
 import type { PoolSave } from "./pool-types";
 import { signOut } from "./sign-in/actions";
 
-// Enough for every place two people will save for a long while. Past this the
-// pool needs filtering by city in the query, not just on screen.
-const POOL_LIMIT = 500;
+// Enough for every place two people will save for a long while (the Google
+// lists alone came to about 700). Past this the pool needs filtering by city in
+// the query, not just on screen.
+const POOL_LIMIT = 2000;
 
 export default async function PoolPage() {
   const { supabase, user } = await requireUser();
