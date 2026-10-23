@@ -1,7 +1,7 @@
 // Shared by the pool page and its client components. Only the fields the
 // screen shows cross to the browser.
 
-export const CATEGORIES = ["eat", "coffee", "drink", "shop", "see", "do", "stay"] as const;
+export const CATEGORIES = ["eat", "coffee", "drink", "shop", "records", "books", "see", "stay"] as const;
 export type Category = (typeof CATEGORIES)[number];
 
 export const CATEGORY_LABEL: Record<Category, string> = {
@@ -9,8 +9,9 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   coffee: "Coffee",
   drink: "Drink",
   shop: "Shop",
+  records: "Records",
+  books: "Books",
   see: "See",
-  do: "Do",
   stay: "Stay",
 };
 
@@ -19,8 +20,9 @@ export const CATEGORY_COLOR: Record<Category, string> = {
   coffee: "#8a5a44",
   drink: "#7b2cbf",
   shop: "#2a9d8f",
+  records: "#e0a100",
+  books: "#4c9a2a",
   see: "#d6336c",
-  do: "#f4a261",
   stay: "#495057",
 };
 

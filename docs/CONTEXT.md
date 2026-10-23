@@ -61,8 +61,9 @@ a shared guide. Not a public product, not a social network.
   "Italy France UK trip", alone has 213 places). Starting from an empty map
   would kill trust in the app.
 - **Categories:** a small fixed set for pin colour and filtering (Eat, Coffee,
-  Drink, Shop, See, Do, Stay) plus free tags for taste (records, natural wine,
-  WWII history). Google's category ("Record store", "Bakery") seeds both.
+  Drink, Shop, Records, Books, See, Stay) plus free tags for taste (natural
+  wine, WWII history). Records and books are constants for us, so they get
+  categories of their own; Do was dropped (theatres and the like are See). Google's category ("Record store", "Bakery") seeds both.
 - **Private stays private.** Our why, via and who-added never appear in a
   shared guide unless written as the public blurb.
 

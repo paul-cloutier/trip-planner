@@ -88,13 +88,15 @@ function categoryFor(key?: string, value?: string): Category | null {
     if (value === "cafe") return "coffee";
     if (["restaurant", "fast_food", "ice_cream", "food_court"].includes(value)) return "eat";
     if (["bar", "pub", "biergarten", "nightclub"].includes(value)) return "drink";
-    if (["theatre", "cinema", "arts_centre"].includes(value)) return "do";
+    if (["theatre", "cinema", "arts_centre"].includes(value)) return "see";
     if (value === "place_of_worship") return "see";
     return null;
   }
   if (key === "shop") {
     if (value === "coffee") return "coffee";
     if (["bakery", "pastry", "confectionery", "deli", "cheese"].includes(value)) return "eat";
+    if (value === "music") return "records";
+    if (value === "books") return "books";
     return "shop";
   }
   if (key === "tourism") {

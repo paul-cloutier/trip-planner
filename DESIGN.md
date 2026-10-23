@@ -24,8 +24,9 @@ colors:
   category-coffee: "#8a5a44"
   category-drink: "#7b2cbf"
   category-shop: "#2a9d8f"
+  category-records: "#e0a100"
+  category-books: "#4c9a2a"
   category-see: "#d6336c"
-  category-do: "#f4a261"
   category-stay: "#495057"
   category-unsorted: "#adb5bd"
   map-cluster: "#262626"
@@ -181,7 +182,7 @@ The layout is dense the way a native list is dense: 17px rows with a 15px line u
 
 ## Colors
 
-Apple's semantic greys and system blue, adjusted so text meets 4.5:1, plus a fixed set of seven category colours.
+Apple's semantic greys and system blue, adjusted so text meets 4.5:1, plus a fixed set of eight category colours.
 
 ### Primary
 - **System Blue** (`accent`; `accent-dark` in dark mode): the only interactive colour. Selected chips, the primary button, text buttons and links ("Trips", "Edit", "Move pin", "Clear filters"), the focus ring, the text caret, the selected-pin ring and the draggable pin marker. Text selection uses it at 28%.
