@@ -16,17 +16,21 @@ const updateSaveSchema = z
       .strict()
       .nullable()
       .optional(),
+    status: z.enum(["want", "been"]).optional(),
+    // Blank means "no note"; stored as null.
+    via: z.string().trim().max(200).transform((v) => v || null).optional(),
+    why: z.string().trim().max(2000).transform((v) => v || null).optional(),
   })
   .strict();
 
-// Set a save's category and/or move its pin. Members of the save's space only:
+// Change a save: category, pin, want/been, via and why. Only the fields given. Members of the save's space only:
 // the update is scoped to the caller's space in the query, and RLS backs it.
 export async function updateSave(input: z.input<typeof updateSaveSchema>) {
   const { supabase, user } = await requireUser();
 
   const parsed = updateSaveSchema.safeParse(input);
   if (!parsed.success) return { ok: false as const };
-  const { saveId, category, pin } = parsed.data;
+  const { saveId, category, pin, status, via, why } = parsed.data;
 
   const { data: membership } = await supabase
     .from("space_members")
@@ -36,8 +40,23 @@ export async function updateSave(input: z.input<typeof updateSaveSchema>) {
     .maybeSingle();
   if (!membership) return { ok: false as const };
 
-  const changes: { category?: (typeof CATEGORIES)[number] | null; pin_lat?: number | null; pin_lng?: number | null } = {};
+  const changes: {
+    category?: (typeof CATEGORIES)[number] | null;
+    pin_lat?: number | null;
+    pin_lng?: number | null;
+    status?: "want" | "been";
+    visited_on?: string | null;
+    via?: string | null;
+    why?: string | null;
+  } = {};
   if (category !== undefined) changes.category = category;
+  if (status !== undefined) {
+    changes.status = status;
+    // Marking been records today; going back to want clears it.
+    changes.visited_on = status === "been" ? new Date().toISOString().slice(0, 10) : null;
+  }
+  if (via !== undefined) changes.via = via;
+  if (why !== undefined) changes.why = why;
   if (pin !== undefined) {
     changes.pin_lat = pin?.lat ?? null;
     changes.pin_lng = pin?.lng ?? null;

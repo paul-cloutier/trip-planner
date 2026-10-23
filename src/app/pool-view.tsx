@@ -30,6 +30,7 @@ export default function PoolView({
   const [city, setCity] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [moving, setMoving] = useState(false);
+  const [editingNote, setEditingNote] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
@@ -51,6 +52,7 @@ export default function PoolView({
   function select(id: string | null) {
     setSelectedId(id);
     setMoving(false);
+    setEditingNote(false);
   }
 
   // Apply locally first, then save; put it back if the save fails.
@@ -71,6 +73,19 @@ export default function PoolView({
   function setCategory(category: Category | null) {
     if (!selected) return;
     change(selected.id, { category }, { saveId: selected.id, category });
+  }
+
+  function setStatus(status: PoolSave["status"]) {
+    if (!selected || selected.status === status) return;
+    change(selected.id, { status }, { saveId: selected.id, status });
+  }
+
+  function saveNote(form: FormData) {
+    if (!selected) return;
+    const via = String(form.get("via") ?? "").trim();
+    const why = String(form.get("why") ?? "").trim();
+    change(selected.id, { via: via || null, why: why || null }, { saveId: selected.id, via, why });
+    setEditingNote(false);
   }
 
   function movePin(pin: { lat: number; lng: number }) {
@@ -97,7 +112,7 @@ export default function PoolView({
         )}
 
         {selected && (
-          <div className="absolute inset-x-2 bottom-2 rounded-lg bg-white p-3 shadow-lg dark:bg-neutral-900">
+          <div className="absolute inset-x-2 bottom-2 max-h-[calc(100%-1rem)] overflow-y-auto rounded-lg bg-white p-3 shadow-lg dark:bg-neutral-900">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="font-medium">{selected.name}</p>
@@ -105,21 +120,76 @@ export default function PoolView({
                   {selected.city ?? "Elsewhere"} · added by {selected.addedBy}
                 </p>
               </div>
-              <button
-                onClick={() => select(null)}
-                aria-label="Close"
-                className="px-1 text-neutral-500"
-              >
-                ✕
-              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                <div
+                  className="flex overflow-hidden rounded-full border text-xs"
+                  role="group"
+                  aria-label="Want or been"
+                >
+                  {(["want", "been"] as const).map((st) => (
+                    <button
+                      key={st}
+                      onClick={() => setStatus(st)}
+                      aria-pressed={selected.status === st}
+                      className="px-2.5 py-1 capitalize aria-pressed:bg-neutral-900 aria-pressed:text-white dark:aria-pressed:bg-white dark:aria-pressed:text-neutral-900"
+                    >
+                      {st}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => select(null)}
+                  aria-label="Close"
+                  className="px-1 text-neutral-500"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
-            {(selected.via || selected.why) && (
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-                {selected.via && <span>via {selected.via}</span>}
-                {selected.via && selected.why && " · "}
-                {selected.why}
-              </p>
+            {editingNote ? (
+              <form action={saveNote} className="mt-2 flex flex-col gap-2 text-sm">
+                <label className="flex flex-col gap-0.5">
+                  <span className="text-xs text-neutral-500">Via (who or what recommended it)</span>
+                  <input
+                    name="via"
+                    defaultValue={selected.via ?? ""}
+                    maxLength={200}
+                    className="rounded-md border border-neutral-300 px-2 py-1 text-base dark:border-neutral-700 dark:bg-neutral-950"
+                  />
+                </label>
+                <label className="flex flex-col gap-0.5">
+                  <span className="text-xs text-neutral-500">Why</span>
+                  <textarea
+                    name="why"
+                    defaultValue={selected.why ?? ""}
+                    maxLength={2000}
+                    rows={2}
+                    className="rounded-md border border-neutral-300 px-2 py-1 text-base dark:border-neutral-700 dark:bg-neutral-950"
+                  />
+                </label>
+                <div className="flex gap-3">
+                  <button className="rounded-md bg-neutral-900 px-3 py-1 text-white dark:bg-white dark:text-neutral-900">
+                    Save note
+                  </button>
+                  <button type="button" onClick={() => setEditingNote(false)} className="underline">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                {(selected.via || selected.why) && (
+                  <p className="whitespace-pre-line">
+                    {selected.via && <span>via {selected.via}</span>}
+                    {selected.via && selected.why && " · "}
+                    {selected.why}
+                  </p>
+                )}
+                <button onClick={() => setEditingNote(true)} className="text-xs underline">
+                  {selected.via || selected.why ? "Edit note" : "Add a note"}
+                </button>
+              </div>
             )}
 
             <div className="mt-2 flex flex-wrap gap-1.5" role="group" aria-label="Category">

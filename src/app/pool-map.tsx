@@ -73,6 +73,8 @@ export default function PoolMap({ token, saves, selectedId, moving, onSelect, on
         id: "saves",
         type: "circle",
         source: "saves",
+        // The selected pin draws above its neighbours.
+        layout: { "circle-sort-key": ["case", ["get", "selected"], 1, 0] },
         paint: {
           "circle-color": colorExpression,
           "circle-radius": ["case", ["get", "selected"], 9, 6],
