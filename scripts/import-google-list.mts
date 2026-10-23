@@ -20,8 +20,9 @@
 // an empty category, a note still as Google had it. With --trip it also
 // rebuilds the trip's undated legs from the current cities.
 //
-// City comes from the address where there is one, and otherwise from the
-// nearest place that does have a city. Category is a guess from the name and
+// City comes from the address where there is one, then from OpenStreetMap's
+// reverse lookup (Photon) for places Google gave only coordinates, and
+// finally from the nearest place that does have a city. Category is a guess from the name and
 // note; anything it cannot place is left unsorted for us to sort.
 
 import { readFileSync } from "node:fs";
@@ -154,7 +155,7 @@ const RULES: [Category, RegExp][] = [
   ["eat", /\b(sushi|ramen|gyoza|gyōza|tonkatsu|yakitori|tempura|curry|tacos?|taqueria|burger|bakery|izakaya|udon|ippudo|ichiran|teppen|kitchen|food stalls|yatai|sangourmand)\b|焼肉|食堂|料理|居酒屋|楽食/i],
   ["eat", /\b(taquer\w*|tacos?|quesadillas?|comal|comedor|restaurante|fonda|panader\w*|churrer\w*|cucurucho|helader\w*|pasteler\w*|tamales?|mariscos|cevicher\w*)\b/i],
   ["eat", /\b(delicatessen|cuisine|biscuit|waffle|burgers?|pho|b[uú]n|sicilian|biang|bbq|grill)\b/i],
-  ["eat", /\b(shake shack|loaves)\b/i],
+  ["eat", /\b(shake shack|loaves|pastr(y|ies)|petit four)\b/i],
   ["see", /\b(museum|museo|musée|church|chiesa|cathedral|cripta|fontana|fountain|piazza|p\.za|palazzo|palais|palace|galleria|gallery|temple|villa|foundation|fondazione|archivio|cemetery|bosco|square|campo|keyhole|sanctuary|pantheon|manor|house|park|village|bibury|appia|ostia|antiquarium|ercolano|presepi|funicolare|borbonica|mouth of truth|curia|triennale|pinacoteca|storehouse|bibliothèque|ateliers|duomo|bletchley|computing|loreto|meter|doll hospital|mercato|bingo|william morris|soane)\b/i],
   ["see", /\b(shrine|yokocho|ginza|bamboo|pavilion|tower|sight|teamlab|market|shinbashi|cat street|memory lane|hall|ishibe|forest|zombie fish|acros|giant 3d cat|cat shelter)\b/i],
   ["see", /\b(plaza|parque|puente|callej[oó]n|kiosko|museo|templo|iglesia|catedral|palacio|mercado|fuente|biblioteca|barrag[aá]n|gilardi|university city)\b/i],
@@ -220,9 +221,53 @@ function km(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
   return Math.sqrt(x * x + y * y) * 6371;
 }
 
+// --- city from OpenStreetMap ------------------------------------------------
+
+// Photon (komoot) is the same OpenStreetMap service the app searches with. It
+// is only asked about places Google gave no address for, one at a time and
+// politely. If it fails we say so once and fall back to the nearest place.
+const photonReverse = z.object({
+  features: z.array(
+    z.object({
+      properties: z.object({
+        city: z.string().optional(),
+        locality: z.string().optional(),
+        county: z.string().optional(),
+        country: z.string().optional(),
+      }),
+    }),
+  ),
+});
+
+let photonDown = false;
+
+async function reverseOsm(lat: number, lng: number) {
+  if (photonDown) return null;
+  const url = new URL("https://photon.komoot.io/reverse");
+  url.searchParams.set("lat", String(lat));
+  url.searchParams.set("lon", String(lng));
+  url.searchParams.set("lang", "en");
+  url.searchParams.set("limit", "1");
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(10_000),
+      headers: { "User-Agent": "trips (personal place list)" },
+    });
+    if (!res.ok) throw new Error(`Photon ${res.status}`);
+    const p = photonReverse.parse(await res.json()).features[0]?.properties;
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const city = p?.city ?? p?.locality ?? p?.county;
+    return city ? { city, country: p?.country ?? null } : null;
+  } catch (e) {
+    photonDown = true;
+    console.warn(`OpenStreetMap lookup failed (${e instanceof Error ? e.message : e}); using nearest place for cities`);
+    return null;
+  }
+}
+
 const located = [];
 for (const p of places) {
-  const where = cityFromAddress(p.address);
+  const where = cityFromAddress(p.address) ?? (await reverseOsm(p.lat, p.lng));
   located.push({ ...p, city: where?.city ?? null, country: where?.country ?? null });
 }
 for (const p of located) {

@@ -28,7 +28,7 @@
 - [x] Server action bodies (sign-in: zod)
 - [ ] Query and path parameters (none yet)
 - [ ] Webhooks: none
-- [x] Third-party API responses from: Photon (OpenStreetMap search), parsed with zod in `src/lib/photon.ts`
+- [x] Third-party API responses from: Photon (OpenStreetMap search), parsed with zod in `src/lib/photon.ts`, and in `scripts/import-google-list.mts` (reverse lookup of cities, coordinates only)
 - [ ] File uploads: Google Takeout CSVs (coming with import); photos later
 - [ ] User text rendered as HTML: via, why, tags. Rendered as text only.
 - [x] Environment variables at boot (`src/lib/env.ts`)
