@@ -39,3 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# kei-interactive-harness: never commit these
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+*.harness-new
+semgrep-nightly.json
+outdated.json
+knip.json
+ratchet-trend.txt
+.claude/settings.local.json
+.harness/shots/
+
+!.env.example

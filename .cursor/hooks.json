@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "stop": [
+      {
+        "command": "node_modules/.bin/harness turn --agent cursor",
+        "loop_limit": 1
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,18 @@
+# Targets, edited by you. The baseline records where you are; this
+# records where you are going. A metric at its goal is finished.
+# Set a goal to 0 for things that should disappear entirely.
+# Lower a goal whenever the baseline drops below it.
+
+any-types=0
+ts-suppressions=0
+lint-suppressions=0
+html-injection=0
+non-null-assertions=0
+public-endpoints=1
+service-role-uses=0
+getsession-allowed=0
+unreviewed-caching=0
+todo-markers=0
+spike-markers=0
+console-logs=0
+client-components=2

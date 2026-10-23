@@ -1,36 +1,20 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Trips
 
-## Getting Started
+A shared pool of places to go, for two people who travel together. See
+`docs/CONTEXT.md` for what it is and why.
 
-First, run the development server:
+## Run it locally
+
+Needs Docker running.
 
 ```bash
+npm install
+supabase start      # local database, auth and mail at http://127.0.0.1:54324
+cp .env.example .env.local   # then paste the publishable key supabase start printed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Sign-up is closed. Add a user in Studio (http://127.0.0.1:54323, Authentication >
+Add user). Their first sign-in creates a space for them. To put a second person
+in the same space, add a row to `space_invites` with their lowercase email
+before creating their account. Sign-in codes land in Mailpit.
