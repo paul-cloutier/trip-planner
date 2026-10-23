@@ -49,35 +49,38 @@ const PAGE_SIZE = 500;
 // response; each is parsed so a shift in Google's layout is an error.
 const tupleHead = <T extends z.ZodType>(first: T) => z.tuple([first]).rest(z.unknown());
 
-const entity = z
-  .array(z.unknown())
-  .transform((e) => ({ address: e[4], coords: e[5], cid: e[6] }))
-  .pipe(
-    z.object({
-      address: z.string().nullish().transform((v) => v ?? null),
-      coords: z.tuple([z.unknown(), z.unknown(), z.number(), z.number()]).rest(z.unknown()),
-      cid: z.tuple([z.string(), z.string()]),
-    }),
-  );
+// z.preprocess turns the positional array into named fields; the inner schema
+// then validates them.
+const positions = (pick: (r: unknown[]) => Record<string, unknown>) => (value: unknown) =>
+  Array.isArray(value) ? pick(value) : value;
 
-const row = z
-  .array(z.unknown())
-  .transform((r) => ({ entity: r[1], name: r[2], note: r[3], created: r[9], by: r[12] }))
-  .pipe(
-    z.object({
-      entity,
-      name: z.string().min(1),
-      note: z.string().nullish().transform((v) => v ?? ""),
-      created: tupleHead(z.number()),
-      by: tupleHead(z.string()),
-    }),
-  );
+const entity = z.preprocess(
+  positions((e) => ({ address: e[4], coords: e[5], cid: e[6] })),
+  z.object({
+    address: z.string().nullish().transform((v) => v ?? null),
+    coords: z.tuple([z.unknown(), z.unknown(), z.number(), z.number()]).rest(z.unknown()),
+    cid: z.tuple([z.string(), z.string()]),
+  }),
+);
 
-const response = z
-  .array(z.unknown())
-  .pipe(z.tuple([z.array(z.unknown())]).rest(z.unknown()))
-  .transform(([list]) => ({ title: list[4], rows: list[8] }))
-  .pipe(z.object({ title: z.string().min(1), rows: z.array(row).max(2000) }));
+const row = z.preprocess(
+  positions((r) => ({ entity: r[1], name: r[2], note: r[3], created: r[9], by: r[12] })),
+  z.object({
+    entity,
+    name: z.string().min(1),
+    note: z.string().nullish().transform((v) => v ?? ""),
+    created: tupleHead(z.number()),
+    by: tupleHead(z.string()),
+  }),
+);
+
+const response = z.preprocess(
+  (value) => {
+    const list = Array.isArray(value) ? value[0] : undefined;
+    return Array.isArray(list) ? { title: list[4], rows: list[8] } : value;
+  },
+  z.object({ title: z.string().min(1), rows: z.array(row).max(2000) }),
+);
 
 // Google writes Japanese-style addresses country first; the importer expects
 // the country last.
