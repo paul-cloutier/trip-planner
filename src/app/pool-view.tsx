@@ -35,25 +35,40 @@ export default function PoolView({
 }) {
   const [saves, setSaves] = useState(initialSaves);
   const [city, setCity] = useState<string | null>(null);
+  const [category, setCategoryFilter] = useState<Category | "unsorted" | null>(null);
+  const [status, setStatusFilter] = useState<PoolSave["status"] | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [moving, setMoving] = useState(false);
   const [editingNote, setEditingNote] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
+  // Category and want/been narrow everything; city counts follow them.
+  const matching = useMemo(
+    () =>
+      saves.filter(
+        (s) =>
+          (!category || (category === "unsorted" ? !s.category : s.category === category)) &&
+          (!status || s.status === status),
+      ),
+    [saves, category, status],
+  );
+
   const cities = useMemo(() => {
     const counts = new Map<string, number>();
-    for (const s of saves) {
+    for (const s of matching) {
       const c = s.city ?? "Elsewhere";
       counts.set(c, (counts.get(c) ?? 0) + 1);
     }
+    if (city && !counts.has(city)) counts.set(city, 0);
     return [...counts].sort((a, b) => b[1] - a[1]);
-  }, [saves]);
+  }, [matching, city]);
 
   const visible = useMemo(
-    () => (city ? saves.filter((s) => (s.city ?? "Elsewhere") === city) : saves),
-    [saves, city],
+    () => (city ? matching.filter((s) => (s.city ?? "Elsewhere") === city) : matching),
+    [matching, city],
   );
+  const filtered = Boolean(category || status);
   const selected = saves.find((s) => s.id === selectedId) ?? null;
 
   // With a city picked, search near the middle of its places.
@@ -299,11 +314,55 @@ export default function PoolView({
       <PlaceSearch near={near} onAdded={placeAdded} />
 
       <div className="flex gap-1.5 overflow-x-auto px-4 py-3" role="group" aria-label="City">
-        <CityChip label="All" count={saves.length} active={!city} onClick={() => setCity(null)} />
+        <CityChip label="All" count={matching.length} active={!city} onClick={() => setCity(null)} />
         {cities.map(([c, n]) => (
           <CityChip key={c} label={c} count={n} active={city === c} onClick={() => setCity(c)} />
         ))}
       </div>
+
+      <div className="flex gap-1.5 overflow-x-auto px-4 pb-3" role="group" aria-label="Filter">
+        {(["want", "been"] as const).map((st) => (
+          <CityChip
+            key={st}
+            label={st === "want" ? "Want" : "Been"}
+            active={status === st}
+            onClick={() => setStatusFilter(status === st ? null : st)}
+          />
+        ))}
+        <span className="mx-1 w-px shrink-0 bg-neutral-200 dark:bg-neutral-800" aria-hidden />
+        {CATEGORIES.map((c) => (
+          <CityChip
+            key={c}
+            label={CATEGORY_LABEL[c]}
+            color={CATEGORY_COLOR[c]}
+            active={category === c}
+            onClick={() => setCategoryFilter(category === c ? null : c)}
+          />
+        ))}
+        <CityChip
+          label="Unsorted"
+          color={UNSORTED_COLOR}
+          active={category === "unsorted"}
+          onClick={() => setCategoryFilter(category === "unsorted" ? null : "unsorted")}
+        />
+      </div>
+
+      {visible.length === 0 && (
+        <p className="px-4 py-2 text-sm text-neutral-500">
+          Nothing matches.{" "}
+          {filtered && (
+            <button
+              onClick={() => {
+                setCategoryFilter(null);
+                setStatusFilter(null);
+              }}
+              className="underline"
+            >
+              Clear filters
+            </button>
+          )}
+        </p>
+      )}
 
       <ul className="flex flex-col divide-y divide-neutral-200 px-4 dark:divide-neutral-800">
         {visible.map((s) => (
@@ -334,11 +393,13 @@ export default function PoolView({
 function CityChip({
   label,
   count,
+  color,
   active,
   onClick,
 }: {
   label: string;
-  count: number;
+  count?: number;
+  color?: string;
   active: boolean;
   onClick: () => void;
 }) {
@@ -346,9 +407,11 @@ function CityChip({
     <button
       onClick={onClick}
       aria-pressed={active}
-      className="shrink-0 rounded-full border px-3 py-1 text-sm aria-pressed:border-neutral-900 aria-pressed:bg-neutral-900 aria-pressed:text-white dark:aria-pressed:border-white dark:aria-pressed:bg-white dark:aria-pressed:text-neutral-900"
+      className="flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-sm aria-pressed:border-neutral-900 aria-pressed:bg-neutral-900 aria-pressed:text-white dark:aria-pressed:border-white dark:aria-pressed:bg-white dark:aria-pressed:text-neutral-900"
     >
-      {label} <span className="opacity-60">{count}</span>
+      {color && <span className="h-2 w-2 rounded-full" style={{ background: color }} aria-hidden />}
+      {label}
+      {count !== undefined && <span className="opacity-60">{count}</span>}
     </button>
   );
 }
