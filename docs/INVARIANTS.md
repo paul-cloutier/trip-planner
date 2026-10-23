@@ -7,7 +7,7 @@
 
 | Actor | Authenticated? | Can read | Can write | Notes |
 |---|---|---|---|---|
-| Anonymous visitor | no | nothing (sign-in page only) | nothing | Shared guides will add a read-only public path later |
+| Anonymous visitor | no | nothing (sign-in page only: password or emailed code) | nothing | Shared guides will add a read-only public path later |
 | Space member | yes (email code) | their space, its members, its saves; all places | saves in their space; rename their space | No open sign-up: accounts are created by hand |
 | Server code (service role) | secret key | everything | `places` only, from `addPlace` and the import script | `places` is shared across spaces, so it only ever holds data we fetched from OpenStreetMap ourselves, never values from a request |
 | Me, in Supabase Studio | dashboard login | everything | everything | Creating users and invites, for now |
@@ -84,4 +84,4 @@ by design; RLS is the boundary.
 |---|---|---|
 | Any signed-in user can read every row of `places` (policy `using (true)`) | It holds only public facts (name, position, address, OSM tag); with one space, nobody else exists to learn which places we saved | A second space: then the set of places reveals what other spaces saved, and reads should go through `saves` |
 | Users and invites are created by hand in Studio | Two people use it | A third person, or shared guides |
-| The first six migrations (the five schema migrations, then `narrow_grants`) were pushed to the hosted `trips` project by hand (`supabase db push`, 2026-10-23), not by the GitHub integration | The integration would not attach to the project after three tries; nothing else was blocking first use, and `narrow_grants` closes the old default grants rather than waiting on it | Once the integration runs on `main`, every later migration goes through it; any further hand push is not covered by this entry |
+| The first six migrations (the five schema migrations, then `narrow_grants`) were pushed to the hosted `trips` project by hand (`supabase db push`, 2026-10-23), not by the GitHub integration | The integration would not attach to the project after three tries; nothing else was blocking first use, and `narrow_grants` closes the old default grants rather than waiting on it | Closed 2026-10-23: the integration now deploys `main` (it applied `index_added_by_created_by` on its own). Every later migration goes through it; any further hand push is not covered by this entry |

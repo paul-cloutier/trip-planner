@@ -1,6 +1,7 @@
 "use server";
 // @public-action: signing in is, by definition, done before there is a user.
-// Only existing accounts get a code (shouldCreateUser: false).
+// Only existing accounts get a code (shouldCreateUser: false) or can use a
+// password; sign-up is off, so neither creates an account.
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -11,7 +12,12 @@ export type SignInState =
   | { step: "email"; error?: string }
   | { step: "code"; email: string; error?: string };
 
+export type PasswordState = { error?: string };
+
 const emailSchema = z.object({ email: z.email().max(320) }).strict();
+const passwordSchema = z
+  .object({ email: z.email().max(320), password: z.string().min(8).max(200) })
+  .strict();
 const codeSchema = z
   .object({ email: z.email().max(320), code: z.string().regex(/^\d{6}$/) })
   .strict();
@@ -52,6 +58,32 @@ export async function verifyCode(_prev: SignInState, formData: FormData): Promis
   if (error) {
     console.error("sign-in: verify failed", error.code);
     return { step: "code", email: parsed.data.email, error: "That code didn't work. Try again." };
+  }
+
+  redirect("/");
+}
+
+export async function signInWithPassword(
+  _prev: PasswordState,
+  formData: FormData,
+): Promise<PasswordState> {
+  const parsed = passwordSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+  // One message for every failure, so the form does not reveal who has an
+  // account. Supabase's auth rate limits apply to repeated tries.
+  const failed = { error: "That email and password didn't match." };
+  if (!parsed.success) return failed;
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email.toLowerCase(),
+    password: parsed.data.password,
+  });
+  if (error) {
+    console.error("sign-in: password failed", error.code);
+    return failed;
   }
 
   redirect("/");

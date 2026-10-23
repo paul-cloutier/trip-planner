@@ -18,3 +18,16 @@ Sign-up is closed. Add a user in Studio (http://127.0.0.1:54323, Authentication 
 Add user). Their first sign-in creates a space for them. To put a second person
 in the same space, add a row to `space_invites` with their lowercase email
 before creating their account. Sign-in codes land in Mailpit.
+
+## Passwords
+
+Sign-in takes a password or an emailed code. Set or change a password yourself;
+the script prompts with hidden input and never stores it:
+
+```bash
+nvm use
+npx tsx scripts/set-password.mts you@example.com --project-ref dzdgfbmwwzwfbycerimn
+```
+
+Leave out `--project-ref` (and add `--env-file=.env.local` after `tsx`) to set
+it on the local database instead.
