@@ -7,7 +7,7 @@ alongside `docs/INVARIANTS.md`.
 
 | Environment | Vercel scope | Supabase project | Public? |
 |---|---|---|---|
-| Production | `kei-inc/trip-planner`, builds from `main` | `trips` (`dzdgfbmwwzwfbycerimn`) | yes, behind sign-in |
+| Production | `kei-inc/trip-planner`, builds from `main`; public at https://trip-planner-alpha-mauve.vercel.app (the `-kei-inc` alias is behind Vercel login) | `trips` (`dzdgfbmwwzwfbycerimn`) | yes, behind sign-in |
 | Preview | `kei-inc/trip-planner`, builds from `play` and PRs | the same `trips` project | Vercel's default protection |
 | Local | development | Supabase CLI on Docker (`supabase start`) | no |
 
@@ -21,10 +21,15 @@ changes locally first.
 
 - Project ref: `dzdgfbmwwzwfbycerimn`, in the Kei organisation
 - Region: us-east-2
-- Migrations: applied by the Supabase GitHub integration on merge to `main`.
-  Never pushed by hand.
+- Migrations: meant to be applied by the Supabase GitHub integration on merge
+  to `main`. The first six (including `narrow_grants`) were pushed by hand on 2026-10-23 (see INVARIANTS,
+  known accepted risks) because the integration would not attach. From here
+  on, never pushed by hand.
 - Tenancy column: `space_id`
-- Data API grants: explicit in every migration from the first one
+- Data API grants: explicit in every migration, but this project still had
+  Supabase's old default of granting everything to anon and authenticated.
+  `narrow_grants` revokes that (pushed by hand, 2026-10-23); RLS also keeps
+  anon out (every table has RLS and only `to authenticated` policies)
 - Tables intentionally readable by `anon`: none
 - Tables intentionally writable by `anon`: none
 - Service role key: `src/lib/supabase/admin.ts`, only to write `places`, which
