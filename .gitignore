@@ -59,9 +59,15 @@ ratchet-trend.txt
 # Takeout exports: our private notes, never committed
 /imports/
 
+# impeccable, the design skill, is installed per machine (npx impeccable
+# install, project scope), not vendored: its browser script would trip CI's
+# security scan. The hooks in .claude/settings.json do nothing without it.
+/.claude/skills/impeccable/
+/.claude/agents/impeccable-*.md
+
 # impeccable working files: hook cache, per-machine config, the decision
-# page's state, decision sketches and review screenshots. The shared config
-# and surface briefs are committed.
+# page's state, decision sketches and review screenshots. The shared config,
+# design sidecar and surface briefs are committed.
 /.impeccable/hook.cache.json
 /.impeccable/config.local.json
 /.impeccable/questions/
