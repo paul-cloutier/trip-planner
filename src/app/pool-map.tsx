@@ -106,7 +106,9 @@ export default function PoolMap({ token, saves, selectedId, moving, onSelect, on
   const idsKey = saves.map((s) => s.id).join(",");
   useEffect(() => {
     const map = mapRef.current;
-    if (map?.isStyleLoaded()) fit(map, latest.current.saves);
+    // isStyleLoaded() is briefly false right after setData, so check for the
+    // source instead: it exists once the map has loaded.
+    if (map?.getSource("saves")) fit(map, latest.current.saves);
   }, [idsKey]);
 
   // Bring the selected place into view when the selection changes (not when
