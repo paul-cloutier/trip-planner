@@ -71,7 +71,12 @@ The phone and the laptop do different jobs, and each layout should be built for 
 
 ## Brand Commitments
 
-None yet. "Trips" is a working name only.
+"Trips" is a working name only.
+
+The whole app takes the category standard on purpose: it should feel like a
+native iPhone and Mac maps app, with Apple Maps as the craft bar. Conventions
+are embraced, not reinvented; the care goes into the details. Chosen in the
+pool view's direction round, 2026-10-23.
 
 ## Evidence on Hand
 

@@ -58,3 +58,12 @@ ratchet-trend.txt
 
 # Takeout exports: our private notes, never committed
 /imports/
+
+# impeccable working files: hook cache, per-machine config, the decision
+# page's state, decision sketches and review screenshots. The shared config
+# and surface briefs are committed.
+/.impeccable/hook.cache.json
+/.impeccable/config.local.json
+/.impeccable/questions/
+/.impeccable/mocks/
+/.impeccable/review/

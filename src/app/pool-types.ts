@@ -19,7 +19,7 @@ export const CATEGORY_COLOR: Record<Category, string> = {
   coffee: "#8a5a44",
   drink: "#7b2cbf",
   shop: "#2a9d8f",
-  see: "#3a86ff",
+  see: "#d6336c",
   do: "#f4a261",
   stay: "#495057",
 };
