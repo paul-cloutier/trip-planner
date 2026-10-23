@@ -113,11 +113,10 @@
   }
 }
 
-/* A category dot as a small lit object: its colour with a soft highlight,
-   set through --dot. */
+/* A category dot, flat in its colour, set through --dot. Gradients belong to
+   surfaces, never to dots or icons. */
 @utility dot {
-  background: radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.55), transparent 60%), var(--dot);
-  box-shadow: inset 0 -1px 1.5px rgb(0 0 0 / 0.18);
+  background: var(--dot);
 }
 
 /* Mapbox's own controls, in the app's materials and following dark mode.

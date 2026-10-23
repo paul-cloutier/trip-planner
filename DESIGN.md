@@ -290,7 +290,7 @@ A light material system on top of tonal layers. Things that float over the map (
 
 Softly rounded, iOS-style. Chips, pills, the close button, the grabber and every dot are fully round. Controls (search field, text fields, buttons) and the map control group use 12px corners; the note card 14px. The segmented control is 11px outside and 9px inside. The phone sheet has 22px top corners; the laptop column is square. Dividers are 1px hairlines; there are no outlined boxes and no borders on controls; edges are drawn with inset highlights, not strokes.
 
-Pins are flat circles: 8px radius with a 2.5px white ring at rest, 11px with a 3px white ring on hover, and 12px with a 4px blue ring when selected. List and chip dots are small lit objects instead: the category colour under a soft white highlight near the top left, with a faint inner shade at the bottom (the `dot` utility). Pins do not get the highlight.
+Pins are flat circles: 8px radius with a 2.5px white ring at rest, 11px with a 3px white ring on hover, and 12px with a 4px blue ring when selected. List and chip dots are flat too: the plain category colour (the `dot` utility). Gradients belong to surfaces, never to dots or icons.
 
 ## Components
 
@@ -333,7 +333,7 @@ Mapbox Standard with the faded theme: parks, water and buildings in soft colour.
 ### Do:
 - **Do** use the platform convention first; if Apple Maps or iOS has a standard control for it, use that look (segmented control, grouped list, frosted sheet with grabber, lit search field).
 - **Do** keep blue for selection, focus and tappable things only; use pressed blue for any blue fill carrying white text.
-- **Do** show categories as dots (12px in rows, 10px in chips, 8px-radius pins), not as text or fill colour; give list and chip dots the `dot` highlight and keep pins flat.
+- **Do** show categories as dots (12px in rows, 10px in chips, 8px-radius pins), not as text or fill colour; keep every dot and pin flat, with no gradient or highlight.
 - **Do** build surfaces from the material utilities (`control`, `card`, `pressed`, `raised`, `material`) and the `--background`, `--grouped`, `--fill` and `--separator` tokens so dark mode keeps working.
 - **Do** keep a solid fallback behind anything frosted.
 - **Do** use the 17 / 15 / 13 px sizes and tabular numerals for distances and counts.
