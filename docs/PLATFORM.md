@@ -1,61 +1,66 @@
 # Platform notes
 
-Fill this in per project. It sits alongside `docs/INVARIANTS.md` and records the
-things about this specific deployment that an agent cannot infer from the code.
+Things about this deployment that an agent cannot infer from the code. Sits
+alongside `docs/INVARIANTS.md`.
 
 ## Environments
 
 | Environment | Vercel scope | Supabase project | Public? |
 |---|---|---|---|
-| Production | production | | yes |
-| Preview | preview | | protected / open |
+| Production | `kei-inc/trip-planner`, builds from `main` | `trips` (`dzdgfbmwwzwfbycerimn`) | yes, behind sign-in |
+| Preview | `kei-inc/trip-planner`, builds from `play` and PRs | the same `trips` project | Vercel's default protection |
 | Local | development | Supabase CLI on Docker (`supabase start`) | no |
 
-**Do previews touch production data?** yes / no. If yes, say why, because this is
-the single most common way a side project leaks its database.
+**Do previews touch production data?** Yes. There are two of us and one
+database; a second project is not worth it yet. The cost: a migration on
+`play` only reaches the hosted database when it merges to `main`, so a preview
+of a branch with a new migration runs against the old tables. Try schema
+changes locally first.
 
 ## Supabase
 
-- Project ref:
-- Region:
-- Tenancy column (the boundary between customers):
-- Data API grants: explicit in migrations since ______ / still on the old
-  auto-grant default (Supabase ends it for existing projects on 2026-10-30)
-- Tables intentionally readable by `anon`:
-- Tables intentionally writable by `anon`:
-- Places the service role key is used, and why RLS could not express the rule:
-- Storage buckets and whether each is public:
-- Point in time recovery enabled: yes / no. Last tested restore:
+- Project ref: `dzdgfbmwwzwfbycerimn`, in the Kei organisation
+- Region: us-east-2
+- Migrations: applied by the Supabase GitHub integration on merge to `main`.
+  Never pushed by hand.
+- Tenancy column: `space_id`
+- Data API grants: explicit in every migration from the first one
+- Tables intentionally readable by `anon`: none
+- Tables intentionally writable by `anon`: none
+- Service role key: `src/lib/supabase/admin.ts`, only to write `places`, which
+  is shared across spaces and must hold only data fetched from OpenStreetMap;
+  and `scripts/import-google-list.mts`, run by hand
+- Storage buckets: none yet
+- Auth: email one-time code; the Magic Link template sends `{{ .Token }}` (see
+  `supabase/templates/sign-in-code.html`); new sign-ups are off; accounts are
+  created by hand, and a second person joins a space through `space_invites`
+- Point in time recovery enabled: no. Last tested restore: never
 
 ## Vercel
 
-- Function region (should match the Supabase region):
-- Routes with a raised `maxDuration`, and why:
-- Deployment protection on previews: on / off
-- Cron jobs, and what happens if one runs twice:
+- Function region: Vercel's default (Washington, iad1), next to us-east-2
+- Routes with a raised `maxDuration`: none
+- Deployment protection on previews: Vercel default
+- Cron jobs: none
+- Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+  `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` (config, public by design) and
+  `SUPABASE_SECRET_KEY` (sensitive), for production and preview
 
 ## Cloudflare
 
-- What Cloudflare does here: DNS only / proxy / WAF / Workers / R2
-- Is the Vercel origin locked to Cloudflare traffic? yes / no
-- Rate limiting rules in place:
-- Routes excluded from edge caching:
+- Not used.
 
 ## Cost surfaces
 
-Things that cost money per use, and what stops them running away.
-
 | Thing | Cost per unit | Limit in place |
 |---|---|---|
-| Supabase egress | | |
-| Vercel function invocations | | |
-| Model or third-party API calls | | |
-| Email sends | | |
+| Supabase project | monthly compute on the Kei plan | one project |
+| Mapbox map loads | free tier, then per 1,000 loads | token restricted to our URLs |
+| Photon search | free public service, fair use | debounced in the browser |
+| Email sends | Supabase built-in mail, rate limited | Supabase OTP limits |
 
 ## The public surface
 
-Keep this list current. It should be short, and it should only grow when you
-decided it should.
-
 | Route or action | Marker | Why public | Rate limited |
 |---|---|---|---|
+| `/sign-in` and `sendCode` / `verifyCode` | `@public-action` | signing in comes before a session | Supabase auth limits |
