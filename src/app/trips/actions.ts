@@ -87,6 +87,29 @@ export async function deleteLeg(input: z.input<typeof deleteLegSchema>) {
   return reconcile(supabase, parsed.data.tripId);
 }
 
+const addToTripSchema = z.object({ tripId: z.uuid(), saveId: z.uuid() }).strict();
+
+// Pull a saved place into a trip, onto its maybe shelf. Already there is fine.
+export async function addToTrip(input: z.input<typeof addToTripSchema>) {
+  const { supabase, spaceId } = await requireSpace();
+  const parsed = addToTripSchema.safeParse(input);
+  if (!spaceId || !parsed.success) return fail;
+
+  // The composite foreign keys refuse a trip or save from another space.
+  const { error } = await supabase
+    .from("trip_items")
+    .upsert(
+      { trip_id: parsed.data.tripId, save_id: parsed.data.saveId, space_id: spaceId },
+      { onConflict: "trip_id,save_id", ignoreDuplicates: true },
+    );
+  if (error) {
+    console.error("addToTrip failed", error.code);
+    return fail;
+  }
+  revalidatePath(`/trips/${parsed.data.tripId}`);
+  return done;
+}
+
 const moveItemSchema = z
   .object({ tripId: z.uuid(), itemId: z.uuid(), day: date.nullable() })
   .strict();

@@ -26,8 +26,11 @@ export default async function PoolPage() {
 
   const spaceId = membership.space_id;
 
-  const [{ data: members, error: membersError }, { data: saves, error: savesError }] =
-    await Promise.all([
+  const [
+    { data: members, error: membersError },
+    { data: saves, error: savesError },
+    { data: trips, error: tripsError },
+  ] = await Promise.all([
       supabase
         .from("space_members")
         .select("user_id, display_name")
@@ -36,13 +39,19 @@ export default async function PoolPage() {
       supabase
         .from("saves")
         .select(
-          "id, via, why, category, status, added_by, pin_lat, pin_lng, place:places(name, city, lat, lng)",
+          "id, via, why, category, status, added_by, pin_lat, pin_lng, place:places(name, city, lat, lng), trip_items(trip_id)",
         )
         .eq("space_id", spaceId)
         .order("added_at", { ascending: false })
         .limit(POOL_LIMIT),
+      supabase
+        .from("trips")
+        .select("id, name")
+        .eq("space_id", spaceId)
+        .order("created_at", { ascending: false })
+        .limit(100),
     ]);
-  if (membersError || savesError) throw new Error("Could not load pool");
+  if (membersError || savesError || tripsError) throw new Error("Could not load pool");
 
   const nameOf = new Map(members.map((m) => [m.user_id, m.display_name]));
 
@@ -62,6 +71,7 @@ export default async function PoolPage() {
             lat: s.pin_lat ?? s.place.lat,
             lng: s.pin_lng ?? s.place.lng,
             moved: s.pin_lat !== null,
+            tripIds: s.trip_items.map((t) => t.trip_id),
           },
         ]
       : [],
@@ -74,6 +84,7 @@ export default async function PoolPage() {
       ) : (
         <PoolView
           initialSaves={pool}
+          trips={trips.map((t) => ({ id: t.id, name: t.name }))}
           mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? null}
         />
       )}

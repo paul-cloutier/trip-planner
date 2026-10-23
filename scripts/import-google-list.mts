@@ -9,7 +9,8 @@
 //
 // Each --member maps the name Google shows for whoever added a place to the
 // email of their account here. Both accounts must be in the same space.
-// Safe to re-run: places upsert on Google's cid, saves on (space, place).
+// Safe to re-run: places upsert on Google's cid; saves already here are left
+// exactly as we have edited them.
 //
 // --trip also makes a draft trip named after the list: every place on its
 // maybe shelf, and an undated leg for each city with five or more places.
@@ -251,11 +252,22 @@ const saves = located.map((p) => {
 // Two Google entries can resolve to one place; keep the first.
 const unique = [...new Map(saves.map((s) => [s.place_id, s])).values()];
 
-const { data: saveRows, error: saveError } = await supabase
+// Existing saves are left alone: a re-run must never undo our edits.
+const { error: saveError } = await supabase
   .from("saves")
-  .upsert(unique, { onConflict: "space_id,place_id" })
-  .select("id");
+  .upsert(unique, { onConflict: "space_id,place_id", ignoreDuplicates: true });
 if (saveError) throw saveError;
+
+// All of this space's saves, then the ones from this list (a long .in() list
+// overflows the URL).
+const { data: spaceSaves, error: saveRowsError } = await supabase
+  .from("saves")
+  .select("id, place_id")
+  .eq("space_id", spaceId)
+  .limit(10_000);
+if (saveRowsError) throw saveRowsError;
+const listPlaceIds = new Set(unique.map((s) => s.place_id));
+const saveRows = spaceSaves.filter((s) => listPlaceIds.has(s.place_id));
 
 if (values.trip) {
   const { data: existing, error: findError } = await supabase

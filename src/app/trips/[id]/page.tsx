@@ -38,7 +38,7 @@ export default async function TripPage({ params }: PageProps<"/trips/[id]">) {
       .limit(50),
     supabase
       .from("trip_items")
-      .select("id, day, save:saves(category, place:places(name, city))")
+      .select("id, day, save:saves(category, pin_lat, pin_lng, place:places(name, city, lat, lng))")
       .eq("trip_id", tripId)
       .eq("space_id", spaceId)
       .order("position")
@@ -62,6 +62,8 @@ export default async function TripPage({ params }: PageProps<"/trips/[id]">) {
             name: i.save.place.name,
             city: i.save.place.city,
             category: i.save.category as Category | null,
+            lat: i.save.pin_lat ?? i.save.place.lat,
+            lng: i.save.pin_lng ?? i.save.place.lng,
           },
         ]
       : [],
@@ -75,7 +77,12 @@ export default async function TripPage({ params }: PageProps<"/trips/[id]">) {
           All trips
         </Link>
       </header>
-      <TripView tripId={trip.id} legs={tripLegs} items={tripItems} />
+      <TripView
+        tripId={trip.id}
+        legs={tripLegs}
+        items={tripItems}
+        mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? null}
+      />
     </main>
   );
 }

@@ -3,7 +3,10 @@
 import dynamic from "next/dynamic";
 import { useMemo, useState, useTransition } from "react";
 
+import Link from "next/link";
+
 import { updateSave } from "./actions";
+import { addToTrip } from "./trips/actions";
 import {
   CATEGORIES,
   CATEGORY_COLOR,
@@ -11,6 +14,7 @@ import {
   UNSORTED_COLOR,
   type Category,
   type PoolSave,
+  type TripOption,
 } from "./pool-types";
 
 // mapbox-gl touches window; load it only in the browser, and only here.
@@ -21,9 +25,11 @@ const PoolMap = dynamic(() => import("./pool-map"), {
 
 export default function PoolView({
   initialSaves,
+  trips,
   mapboxToken,
 }: {
   initialSaves: PoolSave[];
+  trips: TripOption[];
   mapboxToken: string | null;
 }) {
   const [saves, setSaves] = useState(initialSaves);
@@ -86,6 +92,22 @@ export default function PoolView({
     const why = String(form.get("why") ?? "").trim();
     change(selected.id, { via: via || null, why: why || null }, { saveId: selected.id, via, why });
     setEditingNote(false);
+  }
+
+  function addSelectedToTrip(tripId: string) {
+    if (!selected || selected.tripIds.includes(tripId)) return;
+    const id = selected.id;
+    setError(null);
+    setSaves((all) => all.map((s) => (s.id === id ? { ...s, tripIds: [...s.tripIds, tripId] } : s)));
+    startTransition(async () => {
+      const result = await addToTrip({ tripId, saveId: id });
+      if (!result.ok) {
+        setSaves((all) =>
+          all.map((s) => (s.id === id ? { ...s, tripIds: s.tripIds.filter((t) => t !== tripId) } : s)),
+        );
+        setError("Couldn't add it to that trip. Try again.");
+      }
+    });
   }
 
   function movePin(pin: { lat: number; lng: number }) {
@@ -209,6 +231,39 @@ export default function PoolView({
                 </button>
               ))}
             </div>
+
+            {trips.length > 0 && (
+              <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
+                {trips
+                  .filter((t) => selected.tripIds.includes(t.id))
+                  .map((t) => (
+                    <Link
+                      key={t.id}
+                      href={`/trips/${t.id}`}
+                      className="rounded-full bg-neutral-100 px-2.5 py-1 dark:bg-neutral-800"
+                    >
+                      In {t.name}
+                    </Link>
+                  ))}
+                {trips.some((t) => !selected.tripIds.includes(t.id)) && (
+                  <select
+                    value=""
+                    onChange={(e) => e.target.value && addSelectedToTrip(e.target.value)}
+                    aria-label={`Add ${selected.name} to a trip`}
+                    className="rounded-full border border-neutral-300 bg-transparent px-2 py-1 dark:border-neutral-700"
+                  >
+                    <option value="">Add to trip…</option>
+                    {trips
+                      .filter((t) => !selected.tripIds.includes(t.id))
+                      .map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                  </select>
+                )}
+              </div>
+            )}
 
             <div className="mt-2 flex items-center gap-3 text-sm">
               {mapboxToken && (

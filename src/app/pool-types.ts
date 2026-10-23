@@ -38,4 +38,10 @@ export type PoolSave = {
   lat: number;
   lng: number;
   moved: boolean;
+  tripIds: string[];
 };
+
+// What a map pin needs; anything with these fields can go on a map.
+export type MapPin = Pick<PoolSave, "id" | "lat" | "lng" | "category">;
+
+export type TripOption = { id: string; name: string };

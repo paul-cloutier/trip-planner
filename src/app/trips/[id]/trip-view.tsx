@@ -1,10 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useMemo, useOptimistic, useState, useTransition } from "react";
 
 import { CATEGORY_COLOR, UNSORTED_COLOR, type Category } from "../../pool-types";
 import { deleteLeg, moveItem, removeItem, saveLeg } from "../actions";
 import { daysBetween, formatDay } from "../dates";
+
+// mapbox-gl touches window; load it only in the browser.
+const PoolMap = dynamic(() => import("../../pool-map"), {
+  ssr: false,
+  loading: () => <div className="h-full w-full bg-neutral-100 dark:bg-neutral-900" />,
+});
+
+// Which pins the map shows: everything, the maybe shelf, or one day.
+type MapFilter = "all" | "maybe" | string;
 
 export type TripLeg = { id: string; city: string; startsOn: string | null; endsOn: string | null };
 export type TripItem = {
@@ -13,6 +23,8 @@ export type TripItem = {
   name: string;
   city: string | null;
   category: Category | null;
+  lat: number;
+  lng: number;
 };
 
 type ItemChange = { id: string; day: string | null } | { id: string; removed: true };
@@ -21,10 +33,12 @@ export default function TripView({
   tripId,
   legs,
   items,
+  mapboxToken,
 }: {
   tripId: string;
   legs: TripLeg[];
   items: TripItem[];
+  mapboxToken: string | null;
 }) {
   const [optimisticItems, applyChange] = useOptimistic(items, (all, change: ItemChange) =>
     "removed" in change
@@ -33,6 +47,8 @@ export default function TripView({
   );
   const [, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [mapFilter, setMapFilter] = useState<MapFilter>("all");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Every day some dated leg covers, with the cities on it.
   const days = useMemo(() => {
@@ -77,11 +93,58 @@ export default function TripView({
   const remove = (item: TripItem) =>
     run({ id: item.id, removed: true }, () => removeItem({ tripId, itemId: item.id }));
 
-  const itemProps = { days, onMove: move, onRemove: remove };
+  const pins = useMemo(
+    () =>
+      optimisticItems.filter((i) =>
+        mapFilter === "all" ? true : mapFilter === "maybe" ? !i.day : i.day === mapFilter,
+      ),
+    [optimisticItems, mapFilter],
+  );
+
+  // A tapped pin highlights its row and scrolls it into view.
+  function selectPin(id: string | null) {
+    setSelectedId(id);
+    if (id) document.getElementById(`item-${id}`)?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+
+  const itemProps = { days, selectedId, onMove: move, onRemove: remove };
 
   return (
     <div className="flex flex-col gap-6">
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {mapboxToken && (
+        <section className="flex flex-col gap-2">
+          <div className="-mx-4 h-[40dvh] sm:mx-0 sm:overflow-hidden sm:rounded-lg">
+            <PoolMap
+              token={mapboxToken}
+              saves={pins}
+              selectedId={selectedId}
+              moving={false}
+              onSelect={selectPin}
+              onMove={() => {}}
+            />
+          </div>
+          <div className="flex gap-1.5 overflow-x-auto" role="group" aria-label="Show on map">
+            <FilterChip label="All" active={mapFilter === "all"} onClick={() => setMapFilter("all")} />
+            {days.map(({ day, cities }) => (
+              <FilterChip
+                key={day}
+                label={`${formatDay(day)} · ${cities.join("/")}`}
+                count={optimisticItems.filter((i) => i.day === day).length}
+                active={mapFilter === day}
+                onClick={() => setMapFilter(day)}
+              />
+            ))}
+            <FilterChip
+              label="Maybe"
+              count={optimisticItems.filter((i) => !i.day).length}
+              active={mapFilter === "maybe"}
+              onClick={() => setMapFilter("maybe")}
+            />
+          </div>
+        </section>
+      )}
 
       <section className="flex flex-col gap-2">
         <h2 className="font-semibold">Cities</h2>
@@ -144,14 +207,39 @@ export default function TripView({
   );
 }
 
+function FilterChip({
+  label,
+  count,
+  active,
+  onClick,
+}: {
+  label: string;
+  count?: number;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={active}
+      className="shrink-0 rounded-full border px-3 py-1 text-xs aria-pressed:border-neutral-900 aria-pressed:bg-neutral-900 aria-pressed:text-white dark:aria-pressed:border-white dark:aria-pressed:bg-white dark:aria-pressed:text-neutral-900"
+    >
+      {label}
+      {count !== undefined && <span className="opacity-60"> {count}</span>}
+    </button>
+  );
+}
+
 function ItemRow({
   item,
   days,
+  selectedId,
   onMove,
   onRemove,
 }: {
   item: TripItem;
   days: { day: string; cities: string[] }[];
+  selectedId: string | null;
   onMove: (item: TripItem, day: string | null) => void;
   onRemove: (item: TripItem) => void;
 }) {
@@ -161,7 +249,11 @@ function ItemRow({
     ...days.filter((d) => !item.city || !d.cities.includes(item.city)),
   ];
   return (
-    <li className="flex items-center gap-2 py-1.5">
+    <li
+      id={`item-${item.id}`}
+      aria-current={item.id === selectedId}
+      className="flex items-center gap-2 py-1.5 aria-[current=true]:font-semibold"
+    >
       <span
         className="h-2.5 w-2.5 shrink-0 rounded-full"
         style={{ background: item.category ? CATEGORY_COLOR[item.category] : UNSORTED_COLOR }}

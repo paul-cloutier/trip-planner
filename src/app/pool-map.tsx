@@ -6,11 +6,11 @@ import type { FeatureCollection } from "geojson";
 import mapboxgl from "mapbox-gl";
 import { useEffect, useLayoutEffect, useRef } from "react";
 
-import { CATEGORY_COLOR, UNSORTED_COLOR, type PoolSave } from "./pool-types";
+import { CATEGORY_COLOR, UNSORTED_COLOR, type MapPin } from "./pool-types";
 
 type Props = {
   token: string;
-  saves: PoolSave[];
+  saves: MapPin[];
   selectedId: string | null;
   moving: boolean;
   onSelect: (id: string | null) => void;
@@ -24,7 +24,7 @@ const colorExpression = [
   UNSORTED_COLOR,
 ] as unknown as mapboxgl.ExpressionSpecification;
 
-function toGeoJSON(saves: PoolSave[], selectedId: string | null): FeatureCollection {
+function toGeoJSON(saves: MapPin[], selectedId: string | null): FeatureCollection {
   return {
     type: "FeatureCollection",
     features: saves.map((s) => ({
@@ -35,7 +35,7 @@ function toGeoJSON(saves: PoolSave[], selectedId: string | null): FeatureCollect
   };
 }
 
-function fit(map: mapboxgl.Map, saves: PoolSave[]) {
+function fit(map: mapboxgl.Map, saves: MapPin[]) {
   if (saves.length === 0) return;
   const bounds = new mapboxgl.LngLatBounds();
   saves.forEach((s) => bounds.extend([s.lng, s.lat]));
