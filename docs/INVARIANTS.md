@@ -9,7 +9,7 @@
 |---|---|---|---|---|
 | Anonymous visitor | no | nothing (sign-in page only) | nothing | Shared guides will add a read-only public path later |
 | Space member | yes (email code) | their space, its members, its saves; all places | saves in their space; rename their space | No open sign-up: accounts are created by hand |
-| Server code (service role) | secret key | everything | places (Google data), invites, imports | Not used yet |
+| Server code (service role) | secret key | everything | `places` only, from `addPlace` and the import script | `places` is shared across spaces, so it only ever holds data we fetched from OpenStreetMap ourselves, never values from a request |
 | Me, in Supabase Studio | dashboard login | everything | everything | Creating users and invites, for now |
 
 ## 2. The tenancy boundary
@@ -28,7 +28,7 @@
 - [x] Server action bodies (sign-in: zod)
 - [ ] Query and path parameters (none yet)
 - [ ] Webhooks: none
-- [ ] Third-party API responses from: Google Places (coming with import)
+- [x] Third-party API responses from: Photon (OpenStreetMap search), parsed with zod in `src/lib/photon.ts`
 - [ ] File uploads: Google Takeout CSVs (coming with import); photos later
 - [ ] User text rendered as HTML: via, why, tags. Rendered as text only.
 - [x] Environment variables at boot (`src/lib/env.ts`)
@@ -43,7 +43,7 @@
 
 | Name | Where it lives | Rotatable without downtime? |
 |---|---|---|
-| Supabase secret key | Not used yet. Server env only when it is | yes (new key, then revoke) |
+| Supabase secret key (`SUPABASE_SECRET_KEY`) | Server env; used in `src/lib/supabase/admin.ts` (server-only) and scripts | yes (new key, then revoke) |
 | Google Places API key | Not added yet. Server env only | yes |
 
 `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are public
@@ -61,7 +61,7 @@ by design; RLS is the boundary.
 
 | Operation | Cost driver | Rate limited | Idempotent on retry |
 |---|---|---|---|
-| Resolving a place (import, save from link) | Google Places API per call | not yet: needs one before import ships | yes: `google_place_id` is unique, so a place is fetched once |
+| Place search (Photon) | Komoot's free public service, fair use | debounced 300 ms in the browser; no server limit yet (two users) | yes: places upsert on `(osm_type, osm_id)` |
 | Sign-in email | Supabase email quota | Supabase OTP limits | yes |
 
 ## 8. Data I would hate to leak

@@ -48,6 +48,9 @@ export type Database = {
           lat: number
           lng: number
           name: string
+          osm_id: number | null
+          osm_tag: string | null
+          osm_type: string | null
         }
         Insert: {
           address?: string | null
@@ -62,6 +65,9 @@ export type Database = {
           lat: number
           lng: number
           name: string
+          osm_id?: number | null
+          osm_tag?: string | null
+          osm_type?: string | null
         }
         Update: {
           address?: string | null
@@ -76,6 +82,9 @@ export type Database = {
           lat?: number
           lng?: number
           name?: string
+          osm_id?: number | null
+          osm_tag?: string | null
+          osm_type?: string | null
         }
         Relationships: []
       }

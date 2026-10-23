@@ -6,6 +6,7 @@ import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 
 import { updateSave } from "./actions";
+import PlaceSearch from "./place-search";
 import { addToTrip } from "./trips/actions";
 import {
   CATEGORIES,
@@ -54,6 +55,20 @@ export default function PoolView({
     [saves, city],
   );
   const selected = saves.find((s) => s.id === selectedId) ?? null;
+
+  // With a city picked, search near the middle of its places.
+  const near = useMemo(() => {
+    if (!city || visible.length === 0) return undefined;
+    const lat = visible.reduce((n, s) => n + s.lat, 0) / visible.length;
+    const lng = visible.reduce((n, s) => n + s.lng, 0) / visible.length;
+    return { lat, lng };
+  }, [city, visible]);
+
+  function placeAdded(save: PoolSave, existed: boolean) {
+    if (!existed) setSaves((all) => [save, ...all]);
+    if (city && (save.city ?? "Elsewhere") !== city) setCity(null);
+    select(save.id);
+  }
 
   function select(id: string | null) {
     setSelectedId(id);
@@ -280,6 +295,8 @@ export default function PoolView({
           </div>
         )}
       </div>
+
+      <PlaceSearch near={near} onAdded={placeAdded} />
 
       <div className="flex gap-1.5 overflow-x-auto px-4 py-3" role="group" aria-label="City">
         <CityChip label="All" count={saves.length} active={!city} onClick={() => setCity(null)} />
