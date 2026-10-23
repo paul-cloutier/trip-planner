@@ -7,7 +7,7 @@
 
 | Actor | Authenticated? | Can read | Can write | Notes |
 |---|---|---|---|---|
-| Anonymous visitor | no | nothing (sign-in page only) | nothing | Shared guides will add a read-only public path later |
+| Anonymous visitor | no | nothing (sign-in page only: password or emailed code) | nothing | Shared guides will add a read-only public path later |
 | Space member | yes (email code) | their space, its members, its saves; all places | saves in their space; rename their space | No open sign-up: accounts are created by hand |
 | Server code (service role) | secret key | everything | `places` only, from `addPlace` and the import script | `places` is shared across spaces, so it only ever holds data we fetched from OpenStreetMap ourselves, never values from a request |
 | Me, in Supabase Studio | dashboard login | everything | everything | Creating users and invites, for now |

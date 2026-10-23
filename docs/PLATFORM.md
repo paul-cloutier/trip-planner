@@ -36,7 +36,8 @@ changes locally first.
   is shared across spaces and must hold only data fetched from OpenStreetMap;
   and `scripts/import-google-list.mts`, run by hand
 - Storage buckets: none yet
-- Auth: email one-time code; the Magic Link template sends `{{ .Token }}` (see
+- Auth: email + password (set with `scripts/set-password.mts`), or an email
+  one-time code; the Magic Link template sends `{{ .Token }}` (see
   `supabase/templates/sign-in-code.html`); new sign-ups are off; accounts are
   created by hand, and a second person joins a space through `space_invites`
 - Point in time recovery enabled: no. Last tested restore: never
@@ -69,4 +70,4 @@ changes locally first.
 
 | Route or action | Marker | Why public | Rate limited |
 |---|---|---|---|
-| `/sign-in` and `sendCode` / `verifyCode` | `@public-action` | signing in comes before a session | Supabase auth limits |
+| `/sign-in` and `signInWithPassword` / `sendCode` / `verifyCode` | `@public-action` | signing in comes before a session | Supabase auth limits |
