@@ -11,3 +11,5 @@
 # public.plans (plans_read_all)  # just this policy, if you prefer
 # storage.avatars                # profile images are meant to be linkable
 # storage.mark-media             # until(2026-10-15) signed-URL reads deploying first
+
+public.places (places_signed_in_read)  # shared public facts about places (OSM/Google), nothing a person wrote; see INVARIANTS accepted risks
