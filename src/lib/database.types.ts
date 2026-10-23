@@ -224,12 +224,128 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_items: {
+        Row: {
+          added_at: string
+          day: string | null
+          id: string
+          position: number
+          save_id: string
+          space_id: string
+          trip_id: string
+        }
+        Insert: {
+          added_at?: string
+          day?: string | null
+          id?: string
+          position?: number
+          save_id: string
+          space_id: string
+          trip_id: string
+        }
+        Update: {
+          added_at?: string
+          day?: string | null
+          id?: string
+          position?: number
+          save_id?: string
+          space_id?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_items_save_id_space_id_fkey"
+            columns: ["save_id", "space_id"]
+            isOneToOne: false
+            referencedRelation: "saves"
+            referencedColumns: ["id", "space_id"]
+          },
+          {
+            foreignKeyName: "trip_items_trip_id_space_id_fkey"
+            columns: ["trip_id", "space_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id", "space_id"]
+          },
+        ]
+      }
+      trip_legs: {
+        Row: {
+          city: string
+          ends_on: string | null
+          id: string
+          position: number
+          space_id: string
+          starts_on: string | null
+          trip_id: string
+        }
+        Insert: {
+          city: string
+          ends_on?: string | null
+          id?: string
+          position?: number
+          space_id: string
+          starts_on?: string | null
+          trip_id: string
+        }
+        Update: {
+          city?: string
+          ends_on?: string | null
+          id?: string
+          position?: number
+          space_id?: string
+          starts_on?: string | null
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_legs_trip_id_space_id_fkey"
+            columns: ["trip_id", "space_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id", "space_id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          space_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          space_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          space_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trips_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       is_space_member: { Args: { target: string }; Returns: boolean }
+      reconcile_trip_days: { Args: { target: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

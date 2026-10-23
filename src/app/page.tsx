@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { requireUser } from "@/lib/auth";
 
 import PoolView from "./pool-view";
@@ -84,9 +86,14 @@ function Shell({ title, children }: { title: string; children: React.ReactNode }
     <main className="mx-auto flex w-full max-w-3xl flex-col">
       <header className="flex items-center justify-between px-4 py-3">
         <h1 className="text-xl font-semibold">{title}</h1>
-        <form action={signOut}>
-          <button className="text-sm text-neutral-500 underline">Sign out</button>
-        </form>
+        <div className="flex items-center gap-4">
+          <Link href="/trips" className="text-sm underline">
+            Trips
+          </Link>
+          <form action={signOut}>
+            <button className="text-sm text-neutral-500 underline">Sign out</button>
+          </form>
+        </div>
       </header>
       {children}
     </main>

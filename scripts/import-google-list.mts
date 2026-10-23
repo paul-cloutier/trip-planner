@@ -4,11 +4,16 @@
 //   npx tsx --env-file=.env.local scripts/import-google-list.mts \
 //     imports/italy-france-uk-trip.json \
 //     --member "Paul Cloutier=paul@example.com" \
-//     --member "Alana Cloutier=alana@example.com"
+//     --member "Alana Cloutier=alana@example.com" \
+//     --trip
 //
 // Each --member maps the name Google shows for whoever added a place to the
 // email of their account here. Both accounts must be in the same space.
 // Safe to re-run: places upsert on Google's cid, saves on (space, place).
+//
+// --trip also makes a draft trip named after the list: every place on its
+// maybe shelf, and an undated leg for each city with five or more places.
+// Re-running leaves anything already planned onto a day where it is.
 //
 // City comes from Mapbox reverse geocoding when NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 // is set. Without it, from the address where there is one, and otherwise from
@@ -51,7 +56,10 @@ const capture = z.object({
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
-  options: { member: { type: "string", multiple: true, default: [] } },
+  options: {
+    member: { type: "string", multiple: true, default: [] },
+    trip: { type: "boolean", default: false },
+  },
 });
 const file = positionals[0];
 if (!file) throw new Error("usage: import-google-list.mts <file.json> --member 'Name=email' ...");
@@ -146,8 +154,12 @@ const mapboxPlace = z.object({
   ),
 });
 
+// A URL-restricted token refuses requests from a script; then stop asking and
+// fall back to the address.
+let mapboxRefused = false;
+
 async function reverseGeocode(lat: number, lng: number) {
-  if (!env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN) return null;
+  if (!env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || mapboxRefused) return null;
   const url = new URL("https://api.mapbox.com/search/geocode/v6/reverse");
   url.searchParams.set("longitude", String(lng));
   url.searchParams.set("latitude", String(lat));
@@ -155,6 +167,11 @@ async function reverseGeocode(lat: number, lng: number) {
   url.searchParams.set("language", "en");
   url.searchParams.set("access_token", env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN);
   const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+  if (res.status === 401 || res.status === 403) {
+    mapboxRefused = true;
+    console.warn(`Mapbox refused the token (${res.status}); using addresses for cities`);
+    return null;
+  }
   if (!res.ok) throw new Error(`Mapbox reverse geocode failed: ${res.status}`);
   const feature = mapboxPlace.parse(await res.json()).features[0];
   if (!feature) return null;
@@ -234,10 +251,49 @@ const saves = located.map((p) => {
 // Two Google entries can resolve to one place; keep the first.
 const unique = [...new Map(saves.map((s) => [s.place_id, s])).values()];
 
-const { error: saveError } = await supabase
+const { data: saveRows, error: saveError } = await supabase
   .from("saves")
-  .upsert(unique, { onConflict: "space_id,place_id" });
+  .upsert(unique, { onConflict: "space_id,place_id" })
+  .select("id");
 if (saveError) throw saveError;
+
+if (values.trip) {
+  const { data: existing, error: findError } = await supabase
+    .from("trips")
+    .select("id")
+    .eq("space_id", spaceId)
+    .eq("name", list)
+    .limit(1)
+    .maybeSingle();
+  if (findError) throw findError;
+
+  let tripId = existing?.id;
+  if (!tripId) {
+    const { data: created, error: createError } = await supabase
+      .from("trips")
+      .insert({ space_id: spaceId, name: list, created_by: unique[0]?.added_by ?? null })
+      .select("id")
+      .single();
+    if (createError) throw createError;
+    tripId = created.id;
+
+    const counts = new Map<string, number>();
+    for (const p of located) if (p.city) counts.set(p.city, (counts.get(p.city) ?? 0) + 1);
+    const legs = [...counts]
+      .filter(([, n]) => n >= 5)
+      .sort((a, b) => b[1] - a[1])
+      .map(([city], position) => ({ trip_id: tripId as string, space_id: spaceId, city, position }));
+    const { error: legError } = await supabase.from("trip_legs").insert(legs);
+    if (legError) throw legError;
+  }
+
+  const { error: itemError } = await supabase.from("trip_items").upsert(
+    saveRows.map((s) => ({ trip_id: tripId as string, space_id: spaceId, save_id: s.id })),
+    { onConflict: "trip_id,save_id", ignoreDuplicates: true },
+  );
+  if (itemError) throw itemError;
+  console.log(`Draft trip "${list}" holds ${saveRows.length} places`);
+}
 
 const byCity = Object.entries(
   located.reduce<Record<string, number>>((acc, p) => {

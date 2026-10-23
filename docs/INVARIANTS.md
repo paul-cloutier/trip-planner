@@ -16,7 +16,8 @@
 
 - Boundary key: `space_id`.
 - Every table holding user data carries it: `saves`, `space_members`,
-  `space_invites`. Exception: `places` holds only public facts from Google and
+  `space_invites`, `trips`, `trip_legs`, `trip_items`. Composite foreign keys
+  stop a leg, item or save from pointing across spaces. Exception: `places` holds only public facts from Google and
   is shared across spaces. Nothing a person wrote goes in `places`.
 - Enforced in both: row level security through `is_space_member(space_id)`,
   and an explicit `.eq("space_id", …)` in application queries.
@@ -53,6 +54,7 @@ by design; RLS is the boundary.
 | Thing | Grows with | Bounded query? | Index on the hot column? |
 |---|---|---|---|
 | `saves` | places we save, thousands over years | yes, 500 on the pool page | `(space_id, added_at desc)` |
+| `trip_items` | places pulled into trips | yes, 1000 per trip page | `(trip_id, day)` |
 | `places` | every distinct place anyone saves | lookups by id / `google_place_id` | unique on `google_place_id`, `city` |
 
 ## 7. Things that are expensive
