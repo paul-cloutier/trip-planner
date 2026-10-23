@@ -43,8 +43,9 @@ changes locally first.
 - Deployment protection on previews: Vercel default
 - Cron jobs: none
 - Env: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
-  `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` (config, public by design) and
-  `SUPABASE_SECRET_KEY` (sensitive), for production and preview
+  `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` (config, public by design) for production
+  and preview; `SUPABASE_SECRET_KEY` (sensitive) for production only, so a
+  preview can browse but cannot add places
 
 ## Cloudflare
 
