@@ -59,7 +59,8 @@ const entity = z.preprocess(
   z.object({
     address: z.string().nullish().transform((v) => v ?? null),
     coords: z.tuple([z.unknown(), z.unknown(), z.number(), z.number()]).rest(z.unknown()),
-    cid: z.tuple([z.string(), z.string()]),
+    // A dropped pin has coordinates but no Google place behind it.
+    cid: z.tuple([z.string(), z.string()]).optional(),
   }),
 );
 
@@ -112,13 +113,18 @@ if (parsed.rows.length >= PAGE_SIZE) {
 
 // --- write ------------------------------------------------------------------
 
-const places = parsed.rows.map((r) => ({
+const pins = parsed.rows.filter((r) => !r.entity.cid);
+if (pins.length) {
+  console.warn(`Skipped ${pins.length} dropped pin(s) with no Google place: ${pins.map((r) => r.name).join("; ")}`);
+}
+
+const places = parsed.rows.flatMap((r) => (r.entity.cid ? [{ ...r, cid: r.entity.cid }] : [])).map((r) => ({
   name: r.name,
   note: r.note,
   address: countryLast(r.entity.address),
   lat: r.entity.coords[2],
   lng: r.entity.coords[3],
-  cid: r.entity.cid,
+  cid: r.cid,
   kg: null,
   added_at: new Date(r.created[0] * 1000).toISOString(),
   added_by: r.by[0],

@@ -16,10 +16,14 @@
 // maybe shelf, and an undated leg for each city with five or more places.
 // Re-running leaves anything already planned onto a day where it is.
 //
-// City comes from Mapbox reverse geocoding when NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
-// is set. Without it, from the address where there is one, and otherwise from
-// the nearest place that does have a city. Category is a guess from the name
-// and note; anything it cannot place is left unsorted for us to sort.
+// --refresh applies newer guesses to saves already here, only where untouched:
+// an empty category, a note still as Google had it. With --trip it also
+// rebuilds the trip's undated legs from the current cities.
+//
+// City comes from the address where there is one, then from OpenStreetMap's
+// reverse lookup (Photon) for places Google gave only coordinates, and
+// finally from the nearest place that does have a city. Category is a guess from the name and
+// note; anything it cannot place is left unsorted for us to sort.
 
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
@@ -33,7 +37,6 @@ const env = z
   .object({
     NEXT_PUBLIC_SUPABASE_URL: z.url(),
     SUPABASE_SECRET_KEY: z.string().min(1),
-    NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: z.string().min(1).optional(),
   })
   .parse(process.env);
 
@@ -60,6 +63,7 @@ const { values, positionals } = parseArgs({
   options: {
     member: { type: "string", multiple: true, default: [] },
     trip: { type: "boolean", default: false },
+    refresh: { type: "boolean", default: false },
   },
 });
 const file = positionals[0];
@@ -107,7 +111,7 @@ for (const p of places) {
 
 // --- via and why ------------------------------------------------------------
 
-const SOURCES = ["Danielle", "Janelle", "Sam", "Rick Steves", "Monocle", "Michelin", "Claude"];
+const SOURCES = ["Danielle", "Janelle", "Sam", "Rick Steves", "Monocle", "Michelin", "Claude", "Eater", "Neil"];
 
 function splitNote(note: string, addedBy: string): { via: string | null; why: string | null } {
   let text = note.trim();
@@ -117,7 +121,7 @@ function splitNote(note: string, addedBy: string): { via: string | null; why: st
   const found = SOURCES.filter((s) => new RegExp(`\\b${s}\\b`, "i").test(text));
   for (const s of found) {
     text = text
-      .replace(new RegExp(`\\b${s}\\b\\s*(says|recommendation|rec|guide)?\\s*[-:,]?\\s*`, "gi"), " ")
+      .replace(new RegExp(`\\b${s}\\b(?:[’']s)?\\s*(says|recommendation|rec|rex|guide|list)?\\s*[-:,]?\\s*`, "gi"), " ")
       .trim();
   }
   text = text.replace(/^[-,:\s]+|[-,:\s]+$/g, "").replace(/\s+\n/g, "\n").replace(/ {2,}/g, " ");
@@ -130,13 +134,37 @@ type Category = "eat" | "coffee" | "drink" | "shop" | "records" | "books" | "see
 
 const RULES: [Category, RegExp][] = [
   ["stay", /\b(airbnb|hotel)\b/i],
+  ["stay", /\b(residence|lodging)\b/i],
+  ["stay", /\b(inn|suites|hilton|marriott|motel)\b/i],
   ["coffee", /\b(coffee|caffè|caffetteria|torrefazione|bong)\b/i],
+  ["coffee", /\b(kissa|roasters)\b|\bcaf[eé]/i],
   ["records", /\b(records?|dischi|vinili|rough trade|honest jon's|sister ray|phonica)\b/i],
+  ["records", /\b(dub store)\b|レコード/i],
   ["books", /\b(book(s|shop|store)?|librairie|libreria|bouquinistes|artwords)\b/i],
+  ["books", /\b(booksellers?|twelvebooks|t-site)\b|\blibrer/i],
   ["shop", /\b(graphic|watches|magculture|artwords|artazart|tampographe|bouquinistes|whisky|barman|spiritueux|bar tools|salumaio|peck)\b/i],
+  ["shop", /\b(camera|yodobashi|hard off|flea market|antiques|gashapon|muji|beams|kitte|general store|gu tenjin|tamiya|fire kids|d&department|jackroad|maison kitsun\w*)\b|酒販/i],
+  ["shop", /\b(store|tienda|boutique)\b/i],
+  ["shop", /\b(antiques?|mercantile|supply co\.?|boots|hattery|western wear|spice shop|plants?|shoppe|shop)\b/i],
+  ["shop", /\b(trading post|trader joe'?s)\b/i],
   ["drink", /\b(bar|bars|wine|cave|cantine|vinaietto|bierbar|pub|royal standard|camparino|liquiderie|apertivo)\b/i],
+  ["drink", /\b(bourbon)\b|酒場/i],
+  ["drink", /\b(mezcal\w*|cantina|pulquer\w*|cervecer\w*|vinater\w*)\b/i],
+  ["drink", /\b(liquors?|lounge|supper club|brewing|brewery|taproom|cocktails?)\b/i],
+  ["drink", /\b(saloon|tavern)\b/i],
+  ["drink", /\b(cider|aqua vitae|distillery)\b/i],
   ["eat", /\b(trattoria|osteria|hosteria|ristorante|restaurant|pizza|pizzeria|bistrot|pasticceria|boulangerie|gelat\w*|rosticceria|salumeria|tapas|michelin|steak|seafood|sandwich\w*|lunch|neve di latte|supplizio|ciacco|sugo|kubri|baratin|tagine|poulette|hood|lao siam|cornichon|pastamadre|marchesi|sant ambroeus|romanè|roscioli|pianostrada|sorpasso|olio|untitled|kalò|januarius|joca|sorbillo|essencia|luminist|toledo|bonvini|pavé|flavio|armando|ciambella|matarel|latteria|madonnina|panciroli|tina|notte|paradiso|sandì|masuelli|arena|giacomo|santa lucia|cendrillon|combat|parizot|french bastards|deux amis|petit grain|goncourt|utopie)\b/i],
+  ["eat", /\b(sushi|ramen|gyoza|gyōza|tonkatsu|yakitori|tempura|curry|tacos?|taqueria|burger|bakery|izakaya|udon|ippudo|ichiran|teppen|kitchen|food stalls|yatai|sangourmand)\b|焼肉|食堂|料理|居酒屋|楽食/i],
+  ["eat", /\b(taquer\w*|tacos?|quesadillas?|comal|comedor|restaurante|fonda|panader\w*|churrer\w*|cucurucho|helader\w*|pasteler\w*|tamales?|mariscos|cevicher\w*)\b/i],
+  ["eat", /\b(delicatessen|cuisine|biscuit|waffle|burgers?|pho|b[uú]n|sicilian|biang|bbq|grill)\b/i],
+  ["eat", /\b(shake shack|loaves|pastr(y|ies)|petit four)\b/i],
+  ["eat", /\b(barbecue|soul food|donuts?|mochi|bubble tea)\b/i],
   ["see", /\b(museum|museo|musée|church|chiesa|cathedral|cripta|fontana|fountain|piazza|p\.za|palazzo|palais|palace|galleria|gallery|temple|villa|foundation|fondazione|archivio|cemetery|bosco|square|campo|keyhole|sanctuary|pantheon|manor|house|park|village|bibury|appia|ostia|antiquarium|ercolano|presepi|funicolare|borbonica|mouth of truth|curia|triennale|pinacoteca|storehouse|bibliothèque|ateliers|duomo|bletchley|computing|loreto|meter|doll hospital|mercato|bingo|william morris|soane)\b/i],
+  ["see", /\b(shrine|yokocho|ginza|bamboo|pavilion|tower|sight|teamlab|market|shinbashi|cat street|memory lane|hall|ishibe|forest|zombie fish|acros|giant 3d cat|cat shelter)\b/i],
+  ["see", /\b(plaza|parque|puente|callej[oó]n|kiosko|museo|templo|iglesia|catedral|palacio|mercado|fuente|biblioteca|barrag[aá]n|gilardi|university city)\b/i],
+  ["see", /\b(botanical|gardens?|galleries|gallery)\b/i],
+  ["see", /sculpture/i],
+  ["see", /\b(trail|historical society|musuem|farm)\b/i],
 ];
 
 function guessCategory(name: string, note: string): Category | null {
@@ -146,47 +174,38 @@ function guessCategory(name: string, note: string): Category | null {
 
 // --- city -------------------------------------------------------------------
 
-const mapboxPlace = z.object({
-  features: z.array(
-    z.object({
-      properties: z.object({
-        name: z.string(),
-        context: z.object({ country: z.object({ name: z.string() }).optional() }).optional(),
-      }),
-    }),
-  ),
-});
+const CITY_NAMES: Record<string, string> = {
+  Milano: "Milan",
+  Roma: "Rome",
+  Napoli: "Naples",
+  CDMX: "Mexico City",
+  "Ciudad de México": "Mexico City",
+};
 
-// A URL-restricted token refuses requests from a script; then stop asking and
-// fall back to the address.
-let mapboxRefused = false;
+// Japanese addresses end "..., Shinjuku City, Tokyo 160-0021, Japan" or
+// "..., Nakagyo Ward, Kyoto, 604-8042, Japan", sometimes with a leading 〒.
+// These prefectures are the city we think in; elsewhere (Oita, Shizuoka) the
+// town before the prefecture is (Beppu, Itō).
+const JAPAN_CITY_PREFECTURES = new Set(["Tokyo", "Kyoto", "Osaka", "Fukuoka"]);
 
-async function reverseGeocode(lat: number, lng: number) {
-  if (!env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || mapboxRefused) return null;
-  const url = new URL("https://api.mapbox.com/search/geocode/v6/reverse");
-  url.searchParams.set("longitude", String(lng));
-  url.searchParams.set("latitude", String(lat));
-  url.searchParams.set("types", "place");
-  url.searchParams.set("language", "en");
-  url.searchParams.set("access_token", env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN);
-  const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-  if (res.status === 401 || res.status === 403) {
-    mapboxRefused = true;
-    console.warn(`Mapbox refused the token (${res.status}); using addresses for cities`);
-    return null;
-  }
-  if (!res.ok) throw new Error(`Mapbox reverse geocode failed: ${res.status}`);
-  const feature = mapboxPlace.parse(await res.json()).features[0];
-  if (!feature) return null;
-  return { city: feature.properties.name, country: feature.properties.context?.country?.name ?? null };
+function cityFromJapanAddress(parts: string[]) {
+  const cleaned = parts
+    .slice(0, -1)
+    .map((p) => p.replace(/〒/g, "").replace(/\b\d{3}-?\d{4}\b/g, "").trim())
+    .filter(Boolean);
+  const prefecture = cleaned[cleaned.length - 1];
+  if (!prefecture) return null;
+  const city = JAPAN_CITY_PREFECTURES.has(prefecture) ? prefecture : (cleaned[cleaned.length - 2] ?? prefecture);
+  return { city, country: "Japan" };
 }
-
-const CITY_NAMES: Record<string, string> = { Milano: "Milan", Roma: "Rome", Napoli: "Naples" };
 
 function cityFromAddress(address: string | null) {
   const parts = address?.split(",").map((s) => s.trim()) ?? [];
   if (parts.length < 2) return null;
-  const country = parts[parts.length - 1];
+  const last = parts[parts.length - 1];
+  // US addresses end "City, ST 73102" with no country.
+  const country = /^[A-Z]{2}( \d{5})?$/.test(last) ? "United States" : last;
+  if (country === "Japan") return cityFromJapanAddress(parts);
   const raw = parts[parts.length - 2]
     .replace(/^Metropolitan City of (\w+).*$/, "$1")
     .replace(/\b[A-Z0-9]{2,4} ?[0-9][A-Z]{2}\b/, "") // UK postcode
@@ -194,7 +213,8 @@ function cityFromAddress(address: string | null) {
     .replace(/\b[A-Z]{2}$/, "") // Italian province
     .trim();
   const city = raw.split(" ").slice(-2).join(" ").replace(/^(South|North|East|West) /, "");
-  if (!city) return null;
+  // "Méx." is the state around Mexico City, not a city: leave it to the nearest place.
+  if (!city || city === "Méx.") return null;
   return { city: CITY_NAMES[city] ?? city, country };
 }
 
@@ -205,9 +225,53 @@ function km(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
   return Math.sqrt(x * x + y * y) * 6371;
 }
 
+// --- city from OpenStreetMap ------------------------------------------------
+
+// Photon (komoot) is the same OpenStreetMap service the app searches with. It
+// is only asked about places Google gave no address for, one at a time and
+// politely. If it fails we say so once and fall back to the nearest place.
+const photonReverse = z.object({
+  features: z.array(
+    z.object({
+      properties: z.object({
+        city: z.string().optional(),
+        locality: z.string().optional(),
+        county: z.string().optional(),
+        country: z.string().optional(),
+      }),
+    }),
+  ),
+});
+
+let photonDown = false;
+
+async function reverseOsm(lat: number, lng: number) {
+  if (photonDown) return null;
+  const url = new URL("https://photon.komoot.io/reverse");
+  url.searchParams.set("lat", String(lat));
+  url.searchParams.set("lon", String(lng));
+  url.searchParams.set("lang", "en");
+  url.searchParams.set("limit", "1");
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(10_000),
+      headers: { "User-Agent": "trips (personal place list)" },
+    });
+    if (!res.ok) throw new Error(`Photon ${res.status}`);
+    const p = photonReverse.parse(await res.json()).features[0]?.properties;
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const city = p?.city ?? p?.locality ?? p?.county;
+    return city ? { city, country: p?.country ?? null } : null;
+  } catch (e) {
+    photonDown = true;
+    console.warn(`OpenStreetMap lookup failed (${e instanceof Error ? e.message : e}); using nearest place for cities`);
+    return null;
+  }
+}
+
 const located = [];
 for (const p of places) {
-  const where = (await reverseGeocode(p.lat, p.lng)) ?? cityFromAddress(p.address);
+  const where = cityFromAddress(p.address) ?? (await reverseOsm(p.lat, p.lng));
   located.push({ ...p, city: where?.city ?? null, country: where?.country ?? null });
 }
 for (const p of located) {
@@ -264,12 +328,38 @@ if (saveError) throw saveError;
 // overflows the URL).
 const { data: spaceSaves, error: saveRowsError } = await supabase
   .from("saves")
-  .select("id, place_id")
+  .select("id, place_id, via, why, category")
   .eq("space_id", spaceId)
   .limit(10_000);
 if (saveRowsError) throw saveRowsError;
 const listPlaceIds = new Set(unique.map((s) => s.place_id));
 const saveRows = spaceSaves.filter((s) => listPlaceIds.has(s.place_id));
+
+// --refresh applies improved guesses to saves already here, but only where we
+// have not touched them: a category still empty, and a note still exactly as
+// Google had it.
+if (values.refresh) {
+  const noteByPlaceId = new Map(located.map((p) => [placeIdByCid.get(p.cid[1]), p.note.trim()]));
+  const guessByPlaceId = new Map(unique.map((s) => [s.place_id, s]));
+  let refreshed = 0;
+  for (const row of saveRows) {
+    const guess = guessByPlaceId.get(row.place_id);
+    if (!guess) continue;
+    const patch: { category?: Category; via?: string; why?: string | null } = {};
+    if (!row.category && guess.category) patch.category = guess.category;
+    const noteUntouched = !row.via && (row.why ?? "") === (noteByPlaceId.get(row.place_id) ?? "");
+    if (noteUntouched && guess.via) Object.assign(patch, { via: guess.via, why: guess.why });
+    if (!Object.keys(patch).length) continue;
+    const { error: patchError } = await supabase
+      .from("saves")
+      .update(patch)
+      .eq("id", row.id)
+      .eq("space_id", spaceId);
+    if (patchError) throw patchError;
+    refreshed++;
+  }
+  console.log(`Refreshed ${refreshed} saves`);
+}
 
 if (values.trip) {
   const { data: existing, error: findError } = await supabase
@@ -291,6 +381,20 @@ if (values.trip) {
     if (createError) throw createError;
     tripId = created.id;
 
+  }
+
+  // Legs come from the cities with five or more places. A new trip gets them;
+  // --refresh rebuilds the undated ones (dated legs are planning, left alone).
+  if (!existing?.id || values.refresh) {
+    if (existing?.id) {
+      const { error: clearError } = await supabase
+        .from("trip_legs")
+        .delete()
+        .eq("trip_id", tripId as string)
+        .eq("space_id", spaceId)
+        .is("starts_on", null);
+      if (clearError) throw clearError;
+    }
     const counts = new Map<string, number>();
     for (const p of located) if (p.city) counts.set(p.city, (counts.get(p.city) ?? 0) + 1);
     const legs = [...counts]
