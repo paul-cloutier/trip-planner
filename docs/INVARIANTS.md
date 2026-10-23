@@ -83,3 +83,4 @@ by design; RLS is the boundary.
 | Risk | Why it is acceptable today | What would change that |
 |---|---|---|
 | Users and invites are created by hand in Studio | Two people use it | A third person, or shared guides |
+| The first six migrations were pushed to the hosted `trips` project by hand (`supabase db push`, 2026-10-23), not by the GitHub integration | The integration would not attach to the project after three tries, and nothing else was blocking first use | Once the integration runs on `main`, every later migration goes through it; a second hand push is not covered by this entry |
