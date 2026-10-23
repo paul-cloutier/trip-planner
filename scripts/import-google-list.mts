@@ -120,7 +120,7 @@ function splitNote(note: string, addedBy: string): { via: string | null; why: st
   const found = SOURCES.filter((s) => new RegExp(`\\b${s}\\b`, "i").test(text));
   for (const s of found) {
     text = text
-      .replace(new RegExp(`\\b${s}\\b(?:[’']s)?\\s*(says|recommendation|rec|rex|guide)?\\s*[-:,]?\\s*`, "gi"), " ")
+      .replace(new RegExp(`\\b${s}\\b(?:[’']s)?\\s*(says|recommendation|rec|rex|guide|list)?\\s*[-:,]?\\s*`, "gi"), " ")
       .trim();
   }
   text = text.replace(/^[-,:\s]+|[-,:\s]+$/g, "").replace(/\s+\n/g, "\n").replace(/ {2,}/g, " ");
@@ -135,19 +135,23 @@ const RULES: [Category, RegExp][] = [
   ["stay", /\b(airbnb|hotel)\b/i],
   ["stay", /\b(residence|lodging)\b/i],
   ["coffee", /\b(coffee|caffè|caffetteria|torrefazione|bong)\b/i],
-  ["coffee", /\b(cafe|café|kissa|roasters)\b/i],
+  ["coffee", /\b(kissa|roasters)\b|\bcaf[eé]/i],
   ["records", /\b(records?|dischi|vinili|rough trade|honest jon's|sister ray|phonica)\b/i],
   ["records", /\b(dub store)\b|レコード/i],
   ["books", /\b(book(s|shop|store)?|librairie|libreria|bouquinistes|artwords)\b/i],
-  ["books", /\b(booksellers?|twelvebooks|t-site)\b/i],
+  ["books", /\b(booksellers?|twelvebooks|t-site)\b|\blibrer/i],
   ["shop", /\b(graphic|watches|magculture|artwords|artazart|tampographe|bouquinistes|whisky|barman|spiritueux|bar tools|salumaio|peck)\b/i],
   ["shop", /\b(camera|yodobashi|hard off|flea market|antiques|gashapon|muji|beams|kitte|general store|gu tenjin|tamiya|fire kids|d&department|jackroad|maison kitsun\w*)\b|酒販/i],
+  ["shop", /\b(store|tienda|boutique)\b/i],
   ["drink", /\b(bar|bars|wine|cave|cantine|vinaietto|bierbar|pub|royal standard|camparino|liquiderie|apertivo)\b/i],
   ["drink", /\b(bourbon)\b|酒場/i],
+  ["drink", /\b(mezcal\w*|cantina|pulquer\w*|cervecer\w*|vinater\w*)\b/i],
   ["eat", /\b(trattoria|osteria|hosteria|ristorante|restaurant|pizza|pizzeria|bistrot|pasticceria|boulangerie|gelat\w*|rosticceria|salumeria|tapas|michelin|steak|seafood|sandwich\w*|lunch|neve di latte|supplizio|ciacco|sugo|kubri|baratin|tagine|poulette|hood|lao siam|cornichon|pastamadre|marchesi|sant ambroeus|romanè|roscioli|pianostrada|sorpasso|olio|untitled|kalò|januarius|joca|sorbillo|essencia|luminist|toledo|bonvini|pavé|flavio|armando|ciambella|matarel|latteria|madonnina|panciroli|tina|notte|paradiso|sandì|masuelli|arena|giacomo|santa lucia|cendrillon|combat|parizot|french bastards|deux amis|petit grain|goncourt|utopie)\b/i],
   ["eat", /\b(sushi|ramen|gyoza|gyōza|tonkatsu|yakitori|tempura|curry|tacos?|taqueria|burger|bakery|izakaya|udon|ippudo|ichiran|teppen|kitchen|food stalls|yatai|sangourmand)\b|焼肉|食堂|料理|居酒屋|楽食/i],
+  ["eat", /\b(taquer\w*|tacos?|quesadillas?|comal|comedor|restaurante|fonda|panader\w*|churrer\w*|cucurucho|helader\w*|pasteler\w*|tamales?|mariscos|cevicher\w*)\b/i],
   ["see", /\b(museum|museo|musée|church|chiesa|cathedral|cripta|fontana|fountain|piazza|p\.za|palazzo|palais|palace|galleria|gallery|temple|villa|foundation|fondazione|archivio|cemetery|bosco|square|campo|keyhole|sanctuary|pantheon|manor|house|park|village|bibury|appia|ostia|antiquarium|ercolano|presepi|funicolare|borbonica|mouth of truth|curia|triennale|pinacoteca|storehouse|bibliothèque|ateliers|duomo|bletchley|computing|loreto|meter|doll hospital|mercato|bingo|william morris|soane)\b/i],
   ["see", /\b(shrine|yokocho|ginza|bamboo|pavilion|tower|sight|teamlab|market|shinbashi|cat street|memory lane|hall|ishibe|forest|zombie fish|acros|giant 3d cat|cat shelter)\b/i],
+  ["see", /\b(plaza|parque|puente|callej[oó]n|kiosko|museo|templo|iglesia|catedral|palacio|mercado|fuente|biblioteca|barrag[aá]n|gilardi|university city)\b/i],
 ];
 
 function guessCategory(name: string, note: string): Category | null {
@@ -157,7 +161,13 @@ function guessCategory(name: string, note: string): Category | null {
 
 // --- city -------------------------------------------------------------------
 
-const CITY_NAMES: Record<string, string> = { Milano: "Milan", Roma: "Rome", Napoli: "Naples" };
+const CITY_NAMES: Record<string, string> = {
+  Milano: "Milan",
+  Roma: "Rome",
+  Napoli: "Naples",
+  CDMX: "Mexico City",
+  "Ciudad de México": "Mexico City",
+};
 
 // Japanese addresses end "..., Shinjuku City, Tokyo 160-0021, Japan" or
 // "..., Nakagyo Ward, Kyoto, 604-8042, Japan", sometimes with a leading 〒.
@@ -188,7 +198,8 @@ function cityFromAddress(address: string | null) {
     .replace(/\b[A-Z]{2}$/, "") // Italian province
     .trim();
   const city = raw.split(" ").slice(-2).join(" ").replace(/^(South|North|East|West) /, "");
-  if (!city) return null;
+  // "Méx." is the state around Mexico City, not a city: leave it to the nearest place.
+  if (!city || city === "Méx.") return null;
   return { city: CITY_NAMES[city] ?? city, country };
 }
 
