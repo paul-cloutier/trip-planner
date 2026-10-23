@@ -24,14 +24,23 @@ const colorExpression = [
   UNSORTED_COLOR,
 ] as unknown as mapboxgl.ExpressionSpecification;
 
-function toGeoJSON(saves: MapPin[], selectedId: string | null): FeatureCollection {
+function toGeoJSON(saves: MapPin[]): FeatureCollection {
   return {
     type: "FeatureCollection",
     features: saves.map((s) => ({
       type: "Feature",
       geometry: { type: "Point", coordinates: [s.lng, s.lat] },
-      properties: { id: s.id, category: s.category ?? "", selected: s.id === selectedId },
+      properties: { id: s.id, category: s.category ?? "" },
     })),
+  };
+}
+
+// The selected place is drawn from its own source, never clustered, so it
+// stays visible however far out the map is zoomed.
+function split(saves: MapPin[], selectedId: string | null) {
+  return {
+    rest: toGeoJSON(saves.filter((s) => s.id !== selectedId)),
+    selected: toGeoJSON(saves.filter((s) => s.id === selectedId)),
   };
 }
 
@@ -65,21 +74,64 @@ export default function PoolMap({ token, saves, selectedId, moving, onSelect, on
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
 
     map.on("load", () => {
+      const { rest, selected } = split(latest.current.saves, latest.current.selectedId);
+      // Zoomed out, nearby pins merge into a numbered bubble; past street
+      // level (zoom 14) every pin stands alone.
       map.addSource("saves", {
         type: "geojson",
-        data: toGeoJSON(latest.current.saves, latest.current.selectedId),
+        data: rest,
+        cluster: true,
+        clusterMaxZoom: 13,
+        clusterRadius: 36,
+      });
+      map.addSource("selected", { type: "geojson", data: selected });
+
+      map.addLayer({
+        id: "clusters",
+        type: "circle",
+        source: "saves",
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-color": "#262626",
+          "circle-opacity": 0.85,
+          "circle-radius": ["step", ["get", "point_count"], 13, 10, 16, 50, 20],
+          "circle-stroke-color": "#fff",
+          "circle-stroke-width": 1.5,
+        },
+      });
+      map.addLayer({
+        id: "cluster-count",
+        type: "symbol",
+        source: "saves",
+        filter: ["has", "point_count"],
+        layout: {
+          "text-field": ["get", "point_count_abbreviated"],
+          "text-size": 12,
+          "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"],
+        },
+        paint: { "text-color": "#fff" },
       });
       map.addLayer({
         id: "saves",
         type: "circle",
         source: "saves",
-        // The selected pin draws above its neighbours.
-        layout: { "circle-sort-key": ["case", ["get", "selected"], 1, 0] },
+        filter: ["!", ["has", "point_count"]],
         paint: {
           "circle-color": colorExpression,
-          "circle-radius": ["case", ["get", "selected"], 9, 6],
-          "circle-stroke-color": ["case", ["get", "selected"], "#111", "#fff"],
-          "circle-stroke-width": ["case", ["get", "selected"], 3, 1.5],
+          "circle-radius": 6,
+          "circle-stroke-color": "#fff",
+          "circle-stroke-width": 1.5,
+        },
+      });
+      map.addLayer({
+        id: "selected",
+        type: "circle",
+        source: "selected",
+        paint: {
+          "circle-color": colorExpression,
+          "circle-radius": 9,
+          "circle-stroke-color": "#111",
+          "circle-stroke-width": 3,
         },
       });
       fit(map, latest.current.saves);
@@ -88,8 +140,22 @@ export default function PoolMap({ token, saves, selectedId, moving, onSelect, on
         const id = e.features?.[0]?.properties?.id;
         if (typeof id === "string") latest.current.onSelect(id);
       });
-      map.on("mouseenter", "saves", () => (map.getCanvas().style.cursor = "pointer"));
-      map.on("mouseleave", "saves", () => (map.getCanvas().style.cursor = ""));
+      // Tapping a bubble zooms in until it breaks apart.
+      map.on("click", "clusters", (e) => {
+        const feature = e.features?.[0];
+        const clusterId = feature?.properties?.cluster_id;
+        const source = map.getSource("saves") as mapboxgl.GeoJSONSource | undefined;
+        if (typeof clusterId !== "number" || !source || feature?.geometry.type !== "Point") return;
+        const [lng, lat] = feature.geometry.coordinates;
+        source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+          if (err || zoom == null) return;
+          map.easeTo({ center: [lng, lat], zoom });
+        });
+      });
+      for (const layer of ["saves", "clusters"]) {
+        map.on("mouseenter", layer, () => (map.getCanvas().style.cursor = "pointer"));
+        map.on("mouseleave", layer, () => (map.getCanvas().style.cursor = ""));
+      }
     });
 
     return () => {
@@ -100,8 +166,10 @@ export default function PoolMap({ token, saves, selectedId, moving, onSelect, on
 
   // Keep pins in step with the data and the selection.
   useEffect(() => {
-    const source = mapRef.current?.getSource("saves") as mapboxgl.GeoJSONSource | undefined;
-    source?.setData(toGeoJSON(saves, selectedId));
+    const map = mapRef.current;
+    const { rest, selected } = split(saves, selectedId);
+    (map?.getSource("saves") as mapboxgl.GeoJSONSource | undefined)?.setData(rest);
+    (map?.getSource("selected") as mapboxgl.GeoJSONSource | undefined)?.setData(selected);
   }, [saves, selectedId]);
 
   // Refit when the set of places changes (a city filter), not on every edit.
