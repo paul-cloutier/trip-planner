@@ -14,3 +14,5 @@ NEXT_PUBLIC_SENTRY_DSN
 
 # Never add a line for anything containing SERVICE_ROLE. That key bypasses row
 # level security entirely, and no version of it belongs in a browser.
+# Mapbox pk.* token for the map. URL-restrict it in Mapbox once deployed.
+NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN

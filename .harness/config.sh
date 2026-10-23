@@ -45,6 +45,8 @@
 # alternation. The default already accepts requireUser, requireAuth, getUser,
 # getCurrentUser, authorize and verifyWebhook. Add your auth library's here.
 # HARNESS_AUTH_PATTERN='auth\(|getServerSession|currentUser'
+# requireSpace() in src/lib/space.ts calls requireUser() first.
+HARNESS_AUTH_PATTERN='requireSpace\('
 
 
 # Extra ratchet metrics, one "label|regex" per line. Use this instead of

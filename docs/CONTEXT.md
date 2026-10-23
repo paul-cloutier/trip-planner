@@ -53,6 +53,8 @@ a shared guide. Not a public product, not a social network.
 - **iPhone, web first.** A web app added to the home screen, plus an iOS
   Shortcut in the share sheet that posts a link to the app. No native app
   until the web app hits a wall.
+- **Our own map: Mapbox.** Places are ours: we set their category and can
+  move their pin. Google is a source we imported from once, not a dependency.
 - **No sync back to Google Maps.** Our map is the map. Import from Google is
   one-way and one-time.
 - **Import comes first.** We have a lot in Google lists already (one list,
@@ -66,29 +68,23 @@ a shared guide. Not a public product, not a social network.
 
 ## The import
 
-Source is Google Takeout (Saved): one CSV per list with title, note, comment
-and a Google Maps URL. No coordinates, no place ID. Scraping shared list pages
-is out: against Google's terms and brittle.
+A one-off, not a feature. Google Takeout did not include our lists, so each
+list was captured from its shared link in a browser into `imports/` (git
+ignored) and loaded with `scripts/import-google-list.mts`. The capture carries
+coordinates, Google's cid, our note, when it was added and who added it.
 
-- Each of us imports our own Takeout; saves are credited to whoever's file they
-  came from. A place both of us saved merges into one place with both notes.
-- Each URL is resolved to a place through the Places API (costs a little per
-  place; a few hundred places is pennies to a few dollars).
-- Our existing notes are mostly a person's name, sometimes with a reason:
-  "Danielle", "janelle- best seafood", "It's a very thin house". The importer
-  splits "Name- reason" into via and why, and leaves the rest as why.
-- A review screen sorts results into matched, unsure and failed, so the
-  unsure ones get fixed by hand once.
-- An imported list lands as a draft trip with its places on the maybe shelf,
-  and its places join the pool split by city.
+- Notes split into via and why ("Danielle- great steak frites"). A lone "A" is
+  Alana signing her note and is dropped.
+- City from the address, else the nearest place with a city (Mapbox reverse
+  geocoding when a token is set). Category is a keyword guess; the rest land
+  unsorted for us to sort by hand.
+- Once our lists are in, this script can go.
 
 ## Moving
 
 - **Who added what in a shared Google list.** The shared list shows an "A"
   against some places. It may be a note or the initial of whoever added it.
   A real Takeout CSV will tell us.
-- **Map provider.** Leaning Mapbox or MapLibre (cheaper, easier to style than
-  Google's map); Google Places only for matching and enrichment.
 - **Guide design.** We want it to look good, but it is not first. The model
   already supports it.
 - **Auto-marking been** from photo locations. Nice later, not now.

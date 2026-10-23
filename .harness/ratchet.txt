@@ -1,3 +1,7 @@
 public-endpoints|src/app/sign-in/actions.ts|1
 ~client-components|src/app/error.tsx|1
+~client-components|src/app/place-search.tsx|1
+~client-components|src/app/pool-map.tsx|1
+~client-components|src/app/pool-view.tsx|1
 ~client-components|src/app/sign-in/page.tsx|1
+~client-components|src/app/trips/[id]/trip-view.tsx|1
