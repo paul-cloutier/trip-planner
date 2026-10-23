@@ -20,10 +20,9 @@
 // an empty category, a note still as Google had it. With --trip it also
 // rebuilds the trip's undated legs from the current cities.
 //
-// City comes from Mapbox reverse geocoding when NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
-// is set. Without it, from the address where there is one, and otherwise from
-// the nearest place that does have a city. Category is a guess from the name
-// and note; anything it cannot place is left unsorted for us to sort.
+// City comes from the address where there is one, and otherwise from the
+// nearest place that does have a city. Category is a guess from the name and
+// note; anything it cannot place is left unsorted for us to sort.
 
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
@@ -37,7 +36,6 @@ const env = z
   .object({
     NEXT_PUBLIC_SUPABASE_URL: z.url(),
     SUPABASE_SECRET_KEY: z.string().min(1),
-    NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: z.string().min(1).optional(),
   })
   .parse(process.env);
 
@@ -159,41 +157,6 @@ function guessCategory(name: string, note: string): Category | null {
 
 // --- city -------------------------------------------------------------------
 
-const mapboxPlace = z.object({
-  features: z.array(
-    z.object({
-      properties: z.object({
-        name: z.string(),
-        context: z.object({ country: z.object({ name: z.string() }).optional() }).optional(),
-      }),
-    }),
-  ),
-});
-
-// A URL-restricted token refuses requests from a script; then stop asking and
-// fall back to the address.
-let mapboxRefused = false;
-
-async function reverseGeocode(lat: number, lng: number) {
-  if (!env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || mapboxRefused) return null;
-  const url = new URL("https://api.mapbox.com/search/geocode/v6/reverse");
-  url.searchParams.set("longitude", String(lng));
-  url.searchParams.set("latitude", String(lat));
-  url.searchParams.set("types", "place");
-  url.searchParams.set("language", "en");
-  url.searchParams.set("access_token", env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN);
-  const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-  if (res.status === 401 || res.status === 403) {
-    mapboxRefused = true;
-    console.warn(`Mapbox refused the token (${res.status}); using addresses for cities`);
-    return null;
-  }
-  if (!res.ok) throw new Error(`Mapbox reverse geocode failed: ${res.status}`);
-  const feature = mapboxPlace.parse(await res.json()).features[0];
-  if (!feature) return null;
-  return { city: feature.properties.name, country: feature.properties.context?.country?.name ?? null };
-}
-
 const CITY_NAMES: Record<string, string> = { Milano: "Milan", Roma: "Rome", Napoli: "Naples" };
 
 // Japanese addresses end "..., Shinjuku City, Tokyo 160-0021, Japan" or
@@ -238,7 +201,7 @@ function km(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
 
 const located = [];
 for (const p of places) {
-  const where = (await reverseGeocode(p.lat, p.lng)) ?? cityFromAddress(p.address);
+  const where = cityFromAddress(p.address);
   located.push({ ...p, city: where?.city ?? null, country: where?.country ?? null });
 }
 for (const p of located) {
