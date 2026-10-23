@@ -334,6 +334,36 @@
           "oklch(95% 0.050 183)"
         ]
       },
+      "category-records": {
+        "role": "secondary",
+        "displayName": "Category: Records",
+        "canonical": "oklch(75.0% 0.155 80)",
+        "tonalRamp": [
+          "oklch(15% 0.051 80)",
+          "oklch(26% 0.081 80)",
+          "oklch(38% 0.107 80)",
+          "oklch(49% 0.132 80)",
+          "oklch(61% 0.154 80)",
+          "oklch(72% 0.129 80)",
+          "oklch(84% 0.104 80)",
+          "oklch(95% 0.078 80)"
+        ]
+      },
+      "category-books": {
+        "role": "secondary",
+        "displayName": "Category: Books",
+        "canonical": "oklch(61.4% 0.165 138)",
+        "tonalRamp": [
+          "oklch(15% 0.054 138)",
+          "oklch(26% 0.086 138)",
+          "oklch(38% 0.114 138)",
+          "oklch(49% 0.140 138)",
+          "oklch(61% 0.163 138)",
+          "oklch(72% 0.137 138)",
+          "oklch(84% 0.110 138)",
+          "oklch(95% 0.082 138)"
+        ]
+      },
       "category-see": {
         "role": "secondary",
         "displayName": "Category: See",
@@ -347,21 +377,6 @@
           "oklch(72% 0.168 5)",
           "oklch(84% 0.135 5)",
           "oklch(95% 0.100 5)"
-        ]
-      },
-      "category-do": {
-        "role": "secondary",
-        "displayName": "Category: Do",
-        "canonical": "oklch(78.1% 0.127 58)",
-        "tonalRamp": [
-          "oklch(15% 0.042 58)",
-          "oklch(26% 0.066 58)",
-          "oklch(38% 0.088 58)",
-          "oklch(49% 0.108 58)",
-          "oklch(61% 0.126 58)",
-          "oklch(72% 0.106 58)",
-          "oklch(84% 0.085 58)",
-          "oklch(95% 0.063 58)"
         ]
       },
       "category-stay": {

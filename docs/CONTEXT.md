@@ -61,16 +61,18 @@ a shared guide. Not a public product, not a social network.
   "Italy France UK trip", alone has 213 places). Starting from an empty map
   would kill trust in the app.
 - **Categories:** a small fixed set for pin colour and filtering (Eat, Coffee,
-  Drink, Shop, See, Do, Stay) plus free tags for taste (records, natural wine,
-  WWII history). Google's category ("Record store", "Bakery") seeds both.
+  Drink, Shop, Records, Books, See, Stay) plus free tags for taste (natural
+  wine, WWII history). Records and books are constants for us, so they get
+  categories of their own; Do was dropped (theatres and the like are See). Google's category ("Record store", "Bakery") seeds both.
 - **Private stays private.** Our why, via and who-added never appear in a
   shared guide unless written as the public blurb.
 
 ## The import
 
-A one-off, not a feature. Google Takeout did not include our lists, so each
-list was captured from its shared link in a browser into `imports/` (git
-ignored) and loaded with `scripts/import-google-list.mts`. The capture carries
+Scripts, not a feature. Google Takeout did not include our lists, so each
+list is captured from its shared link with `scripts/capture-google-list.mts`
+into `imports/` (git ignored) and loaded with `scripts/import-google-list.mts`
+(Node 22; against production it needs the hosted secret key). The capture carries
 coordinates, Google's cid, our note, when it was added and who added it.
 
 - Notes split into via and why ("Danielle- great steak frites"). A lone "A" is
@@ -78,7 +80,8 @@ coordinates, Google's cid, our note, when it was added and who added it.
 - City from the address, else the nearest place with a city (Mapbox reverse
   geocoding when a token is set). Category is a keyword guess; the rest land
   unsorted for us to sort by hand.
-- Once our lists are in, this script can go.
+- Italy France UK trip and Japan are in. The scripts stay for as long as we
+  keep bringing Google lists across.
 
 ## Moving
 

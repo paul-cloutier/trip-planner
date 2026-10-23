@@ -63,7 +63,9 @@ The phone and the laptop do different jobs, and each layout should be built for 
 - Vocabulary is fixed: Place, Save, Pool, Collection, Trip, Day, Maybe shelf,
   Guide, via, why, want, been. Use these words in the UI.
 - Categories are a small fixed set used for pin colour and filtering: Eat,
-  Coffee, Drink, Shop, See, Do, Stay. Free tags carry taste.
+  Coffee, Drink, Shop, Records, Books, See, Stay. Record shops and bookshops
+  are constants for us, so they are categories, not tags. Free tags carry
+  taste.
 - Private stays private: why, via and who-added never appear in a shared guide
   unless written as the public blurb.
 - Undecided: itinerary depth (times, travel between places, neighbourhood

@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { requireUser } from "@/lib/auth";
 
-const CATEGORIES = ["eat", "coffee", "drink", "shop", "see", "do", "stay"] as const;
+const CATEGORIES = ["eat", "coffee", "drink", "shop", "records", "books", "see", "stay"] as const;
 
 const updateSaveSchema = z
   .object({

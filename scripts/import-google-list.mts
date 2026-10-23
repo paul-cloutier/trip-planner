@@ -126,12 +126,14 @@ function splitNote(note: string, addedBy: string): { via: string | null; why: st
 
 // --- category ---------------------------------------------------------------
 
-type Category = "eat" | "coffee" | "drink" | "shop" | "see" | "do" | "stay";
+type Category = "eat" | "coffee" | "drink" | "shop" | "records" | "books" | "see" | "stay";
 
 const RULES: [Category, RegExp][] = [
   ["stay", /\b(airbnb|hotel)\b/i],
   ["coffee", /\b(coffee|caffè|caffetteria|torrefazione|bong)\b/i],
-  ["shop", /\b(records?|dischi|vinili|book(s|shop|store)?|librairie|libreria|graphic|watches|magculture|artwords|artazart|tampographe|bouquinistes|whisky|barman|spiritueux|bar tools|salumaio|peck)\b/i],
+  ["records", /\b(records?|dischi|vinili|rough trade|honest jon's|sister ray|phonica)\b/i],
+  ["books", /\b(book(s|shop|store)?|librairie|libreria|bouquinistes|artwords)\b/i],
+  ["shop", /\b(graphic|watches|magculture|artwords|artazart|tampographe|bouquinistes|whisky|barman|spiritueux|bar tools|salumaio|peck)\b/i],
   ["drink", /\b(bar|bars|wine|cave|cantine|vinaietto|bierbar|pub|royal standard|camparino|liquiderie|apertivo)\b/i],
   ["eat", /\b(trattoria|osteria|hosteria|ristorante|restaurant|pizza|pizzeria|bistrot|pasticceria|boulangerie|gelat\w*|rosticceria|salumeria|tapas|michelin|steak|seafood|sandwich\w*|lunch|neve di latte|supplizio|ciacco|sugo|kubri|baratin|tagine|poulette|hood|lao siam|cornichon|pastamadre|marchesi|sant ambroeus|romanè|roscioli|pianostrada|sorpasso|olio|untitled|kalò|januarius|joca|sorbillo|essencia|luminist|toledo|bonvini|pavé|flavio|armando|ciambella|matarel|latteria|madonnina|panciroli|tina|notte|paradiso|sandì|masuelli|arena|giacomo|santa lucia|cendrillon|combat|parizot|french bastards|deux amis|petit grain|goncourt|utopie)\b/i],
   ["see", /\b(museum|museo|musée|church|chiesa|cathedral|cripta|fontana|fountain|piazza|p\.za|palazzo|palais|palace|galleria|gallery|temple|villa|foundation|fondazione|archivio|cemetery|bosco|square|campo|keyhole|sanctuary|pantheon|manor|house|park|village|bibury|appia|ostia|antiquarium|ercolano|presepi|funicolare|borbonica|mouth of truth|curia|triennale|pinacoteca|storehouse|bibliothèque|ateliers|duomo|bletchley|computing|loreto|meter|doll hospital|mercato|bingo|william morris|soane)\b/i],
