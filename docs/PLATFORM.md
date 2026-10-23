@@ -23,8 +23,8 @@ changes locally first.
 - Region: us-east-2
 - Migrations: meant to be applied by the Supabase GitHub integration on merge
   to `main`. The first six were pushed by hand on 2026-10-23 (see INVARIANTS,
-  known accepted risks) because the integration would not attach.
-  Never pushed by hand.
+  known accepted risks) because the integration would not attach. From here
+  on, never pushed by hand.
 - Tenancy column: `space_id`
 - Data API grants: explicit in every migration from the first one
 - Tables intentionally readable by `anon`: none
