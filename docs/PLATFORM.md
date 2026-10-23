@@ -21,8 +21,8 @@ changes locally first.
 
 - Project ref: `dzdgfbmwwzwfbycerimn`, in the Kei organisation
 - Region: us-east-2
-- Migrations: meant to be applied by the Supabase GitHub integration on merge
-  to `main`. The first six (including `narrow_grants`) were pushed by hand on 2026-10-23 (see INVARIANTS,
+- Migrations: applied by the Supabase GitHub integration on merge to `main`
+  (Branching on, `main` as production; working since 2026-10-23). The first six (including `narrow_grants`) were pushed by hand on 2026-10-23 (see INVARIANTS,
   known accepted risks) because the integration would not attach. From here
   on, never pushed by hand.
 - Tenancy column: `space_id`
