@@ -135,6 +135,7 @@ type Category = "eat" | "coffee" | "drink" | "shop" | "records" | "books" | "see
 const RULES: [Category, RegExp][] = [
   ["stay", /\b(airbnb|hotel)\b/i],
   ["stay", /\b(residence|lodging)\b/i],
+  ["stay", /\b(inn|suites|hilton|marriott|motel)\b/i],
   ["coffee", /\b(coffee|caffè|caffetteria|torrefazione|bong)\b/i],
   ["coffee", /\b(kissa|roasters)\b|\bcaf[eé]/i],
   ["records", /\b(records?|dischi|vinili|rough trade|honest jon's|sister ray|phonica)\b/i],
@@ -151,16 +152,19 @@ const RULES: [Category, RegExp][] = [
   ["drink", /\b(mezcal\w*|cantina|pulquer\w*|cervecer\w*|vinater\w*)\b/i],
   ["drink", /\b(liquors?|lounge|supper club|brewing|brewery|taproom|cocktails?)\b/i],
   ["drink", /\b(saloon|tavern)\b/i],
+  ["drink", /\b(cider|aqua vitae|distillery)\b/i],
   ["eat", /\b(trattoria|osteria|hosteria|ristorante|restaurant|pizza|pizzeria|bistrot|pasticceria|boulangerie|gelat\w*|rosticceria|salumeria|tapas|michelin|steak|seafood|sandwich\w*|lunch|neve di latte|supplizio|ciacco|sugo|kubri|baratin|tagine|poulette|hood|lao siam|cornichon|pastamadre|marchesi|sant ambroeus|romanè|roscioli|pianostrada|sorpasso|olio|untitled|kalò|januarius|joca|sorbillo|essencia|luminist|toledo|bonvini|pavé|flavio|armando|ciambella|matarel|latteria|madonnina|panciroli|tina|notte|paradiso|sandì|masuelli|arena|giacomo|santa lucia|cendrillon|combat|parizot|french bastards|deux amis|petit grain|goncourt|utopie)\b/i],
   ["eat", /\b(sushi|ramen|gyoza|gyōza|tonkatsu|yakitori|tempura|curry|tacos?|taqueria|burger|bakery|izakaya|udon|ippudo|ichiran|teppen|kitchen|food stalls|yatai|sangourmand)\b|焼肉|食堂|料理|居酒屋|楽食/i],
   ["eat", /\b(taquer\w*|tacos?|quesadillas?|comal|comedor|restaurante|fonda|panader\w*|churrer\w*|cucurucho|helader\w*|pasteler\w*|tamales?|mariscos|cevicher\w*)\b/i],
   ["eat", /\b(delicatessen|cuisine|biscuit|waffle|burgers?|pho|b[uú]n|sicilian|biang|bbq|grill)\b/i],
   ["eat", /\b(shake shack|loaves|pastr(y|ies)|petit four)\b/i],
+  ["eat", /\b(barbecue|soul food|donuts?|mochi|bubble tea)\b/i],
   ["see", /\b(museum|museo|musée|church|chiesa|cathedral|cripta|fontana|fountain|piazza|p\.za|palazzo|palais|palace|galleria|gallery|temple|villa|foundation|fondazione|archivio|cemetery|bosco|square|campo|keyhole|sanctuary|pantheon|manor|house|park|village|bibury|appia|ostia|antiquarium|ercolano|presepi|funicolare|borbonica|mouth of truth|curia|triennale|pinacoteca|storehouse|bibliothèque|ateliers|duomo|bletchley|computing|loreto|meter|doll hospital|mercato|bingo|william morris|soane)\b/i],
   ["see", /\b(shrine|yokocho|ginza|bamboo|pavilion|tower|sight|teamlab|market|shinbashi|cat street|memory lane|hall|ishibe|forest|zombie fish|acros|giant 3d cat|cat shelter)\b/i],
   ["see", /\b(plaza|parque|puente|callej[oó]n|kiosko|museo|templo|iglesia|catedral|palacio|mercado|fuente|biblioteca|barrag[aá]n|gilardi|university city)\b/i],
   ["see", /\b(botanical|gardens?|galleries|gallery)\b/i],
   ["see", /sculpture/i],
+  ["see", /\b(trail|historical society|musuem|farm)\b/i],
 ];
 
 function guessCategory(name: string, note: string): Category | null {
