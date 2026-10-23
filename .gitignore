@@ -55,3 +55,6 @@ ratchet-trend.txt
 .harness/shots/
 
 !.env.example
+
+# Takeout exports: our private notes, never committed
+/imports/

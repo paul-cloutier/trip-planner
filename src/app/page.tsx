@@ -77,7 +77,7 @@ export default async function PoolPage() {
                   <div className="flex items-baseline justify-between gap-3">
                     <span className="font-medium">{save.place?.name}</span>
                     <span className="shrink-0 text-xs text-neutral-500">
-                      {CATEGORY_LABEL[save.category] ?? save.category}
+                      {save.category ? (CATEGORY_LABEL[save.category] ?? save.category) : "Unsorted"}
                       {save.status === "been" ? " · been" : ""}
                     </span>
                   </div>

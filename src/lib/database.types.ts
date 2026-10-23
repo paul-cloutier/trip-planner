@@ -40,7 +40,8 @@ export type Database = {
           city: string | null
           country: string | null
           fetched_at: string
-          google_place_id: string
+          google_cid: string | null
+          google_place_id: string | null
           google_primary_type: string | null
           google_types: string[]
           id: string
@@ -53,7 +54,8 @@ export type Database = {
           city?: string | null
           country?: string | null
           fetched_at?: string
-          google_place_id: string
+          google_cid?: string | null
+          google_place_id?: string | null
           google_primary_type?: string | null
           google_types?: string[]
           id?: string
@@ -66,7 +68,8 @@ export type Database = {
           city?: string | null
           country?: string | null
           fetched_at?: string
-          google_place_id?: string
+          google_cid?: string | null
+          google_place_id?: string | null
           google_primary_type?: string | null
           google_types?: string[]
           id?: string
@@ -80,7 +83,7 @@ export type Database = {
         Row: {
           added_at: string
           added_by: string | null
-          category: string
+          category: string | null
           id: string
           place_id: string
           source_url: string | null
@@ -95,7 +98,7 @@ export type Database = {
         Insert: {
           added_at?: string
           added_by?: string | null
-          category?: string
+          category?: string | null
           id?: string
           place_id: string
           source_url?: string | null
@@ -110,7 +113,7 @@ export type Database = {
         Update: {
           added_at?: string
           added_by?: string | null
-          category?: string
+          category?: string | null
           id?: string
           place_id?: string
           source_url?: string | null
