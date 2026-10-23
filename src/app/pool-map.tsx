@@ -28,6 +28,9 @@ const colorExpression = [
   UNSORTED_COLOR,
 ] as unknown as mapboxgl.ExpressionSpecification;
 
+// Standard's colour themes: "default" is the fuller palette, "faded" a softer one.
+const THEME = "faded";
+
 // Matches --accent in globals.css, light and dark; the map paints outside CSS.
 function accent() {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "#3b9bff" : "#0062cc";
@@ -98,12 +101,22 @@ export default function PoolMap({
   useEffect(() => {
     if (!container.current) return;
     mapboxgl.accessToken = token;
+    const scheme = window.matchMedia("(prefers-color-scheme: dark)");
     const map = new mapboxgl.Map({
       container: container.current,
-      // Chosen once at load; switching styles later would drop our layers.
-      style: window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "mapbox://styles/mapbox/dark-v11"
-        : "mapbox://styles/mapbox/light-v11",
+      // Mapbox Standard: parks, water and buildings in soft colour, closer to
+      // Apple Maps than the grey light style. Its own place icons are off so
+      // they never read as our pins; day and night follow the system.
+      style: "mapbox://styles/mapbox/standard",
+      config: {
+        basemap: {
+          theme: THEME,
+          lightPreset: scheme.matches ? "night" : "day",
+          showPointOfInterestLabels: false,
+          showTransitLabels: false,
+          show3dObjects: false,
+        },
+      },
       // The phone sheet covers the bottom of the map, so Mapbox's logo and
       // credits sit at the top, where they stay visible.
       attributionControl: false,
@@ -135,6 +148,8 @@ export default function PoolMap({
         source: "saves",
         filter: ["has", "point_count"],
         paint: {
+          // Lit at full strength, so Standard's night lighting never dims our pins.
+          "circle-emissive-strength": 1,
           "circle-color": "#262626",
           "circle-opacity": 0.85,
           "circle-radius": ["step", ["get", "point_count"], 13, 10, 16, 50, 20],
@@ -152,7 +167,7 @@ export default function PoolMap({
           "text-size": 12,
           "text-font": ["DIN Pro Medium", "Arial Unicode MS Regular"],
         },
-        paint: { "text-color": "#fff" },
+        paint: { "text-color": "#fff", "text-emissive-strength": 1 },
       });
       // A soft shadow under each pin, then the pin: big enough to read and
       // tap on a phone in the street.
@@ -162,6 +177,8 @@ export default function PoolMap({
         source: "saves",
         filter: ["!", ["has", "point_count"]],
         paint: {
+          // Lit at full strength, so Standard's night lighting never dims our pins.
+          "circle-emissive-strength": 1,
           "circle-color": "#000",
           "circle-opacity": 0.22,
           "circle-radius": 10,
@@ -175,6 +192,8 @@ export default function PoolMap({
         source: "saves",
         filter: ["!", ["has", "point_count"]],
         paint: {
+          // Lit at full strength, so Standard's night lighting never dims our pins.
+          "circle-emissive-strength": 1,
           "circle-color": colorExpression,
           "circle-radius": 8,
           "circle-stroke-color": "#fff",
@@ -186,6 +205,8 @@ export default function PoolMap({
         type: "circle",
         source: "hovered",
         paint: {
+          // Lit at full strength, so Standard's night lighting never dims our pins.
+          "circle-emissive-strength": 1,
           "circle-color": colorExpression,
           "circle-radius": 11,
           "circle-stroke-color": "#fff",
@@ -197,6 +218,8 @@ export default function PoolMap({
         type: "circle",
         source: "selected",
         paint: {
+          // Lit at full strength, so Standard's night lighting never dims our pins.
+          "circle-emissive-strength": 1,
           "circle-color": colorExpression,
           "circle-radius": 12,
           "circle-stroke-color": accent(),
@@ -237,7 +260,15 @@ export default function PoolMap({
       }
     });
 
+    // Switch day and night in place; Standard keeps our layers when it does.
+    const onScheme = () => {
+      map.setConfigProperty("basemap", "lightPreset", scheme.matches ? "night" : "day");
+      if (map.getLayer("selected")) map.setPaintProperty("selected", "circle-stroke-color", accent());
+    };
+    scheme.addEventListener("change", onScheme);
+
     return () => {
+      scheme.removeEventListener("change", onScheme);
       map.remove();
       mapRef.current = null;
     };

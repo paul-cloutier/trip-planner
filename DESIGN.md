@@ -289,7 +289,7 @@ A background-white panel with 14px top corners and the sheet shadow. A 36×5px r
 A grouped-grey 10px card with 12px by 14px padding: "Added by [name], via [source]" with the labels in secondary, then the why. Placeholder text is secondary.
 
 ### Map
-Mapbox light-v11 or dark-v11, picked from the system setting at load. Pins and clusters as described under Shapes and Colors. Zoom controls and attribution are re-themed with app tokens; their icons are inverted in dark mode.
+Mapbox Standard with the faded theme: parks, water and buildings in soft colour. Its own place icons, transit labels and 3D buildings are off, so only our pins mark places. Day and night lighting follow the system setting live, and every pin and cluster layer is lit at full strength so night never dims it. Pins and clusters as described under Shapes and Colors. Zoom controls and attribution are re-themed with app tokens; their icons are inverted in dark mode.
 
 ## Do's and Don'ts
 
