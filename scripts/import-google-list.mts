@@ -16,6 +16,10 @@
 // maybe shelf, and an undated leg for each city with five or more places.
 // Re-running leaves anything already planned onto a day where it is.
 //
+// --refresh applies newer guesses to saves already here, only where untouched:
+// an empty category, a note still as Google had it. With --trip it also
+// rebuilds the trip's undated legs from the current cities.
+//
 // City comes from Mapbox reverse geocoding when NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 // is set. Without it, from the address where there is one, and otherwise from
 // the nearest place that does have a city. Category is a guess from the name
@@ -60,6 +64,7 @@ const { values, positionals } = parseArgs({
   options: {
     member: { type: "string", multiple: true, default: [] },
     trip: { type: "boolean", default: false },
+    refresh: { type: "boolean", default: false },
   },
 });
 const file = positionals[0];
@@ -107,7 +112,7 @@ for (const p of places) {
 
 // --- via and why ------------------------------------------------------------
 
-const SOURCES = ["Danielle", "Janelle", "Sam", "Rick Steves", "Monocle", "Michelin", "Claude"];
+const SOURCES = ["Danielle", "Janelle", "Sam", "Rick Steves", "Monocle", "Michelin", "Claude", "Eater", "Neil"];
 
 function splitNote(note: string, addedBy: string): { via: string | null; why: string | null } {
   let text = note.trim();
@@ -117,7 +122,7 @@ function splitNote(note: string, addedBy: string): { via: string | null; why: st
   const found = SOURCES.filter((s) => new RegExp(`\\b${s}\\b`, "i").test(text));
   for (const s of found) {
     text = text
-      .replace(new RegExp(`\\b${s}\\b\\s*(says|recommendation|rec|guide)?\\s*[-:,]?\\s*`, "gi"), " ")
+      .replace(new RegExp(`\\b${s}\\b(?:[’']s)?\\s*(says|recommendation|rec|rex|guide)?\\s*[-:,]?\\s*`, "gi"), " ")
       .trim();
   }
   text = text.replace(/^[-,:\s]+|[-,:\s]+$/g, "").replace(/\s+\n/g, "\n").replace(/ {2,}/g, " ");
@@ -130,13 +135,21 @@ type Category = "eat" | "coffee" | "drink" | "shop" | "records" | "books" | "see
 
 const RULES: [Category, RegExp][] = [
   ["stay", /\b(airbnb|hotel)\b/i],
+  ["stay", /\b(residence|lodging)\b/i],
   ["coffee", /\b(coffee|caffè|caffetteria|torrefazione|bong)\b/i],
+  ["coffee", /\b(cafe|café|kissa|roasters)\b/i],
   ["records", /\b(records?|dischi|vinili|rough trade|honest jon's|sister ray|phonica)\b/i],
+  ["records", /\b(dub store)\b|レコード/i],
   ["books", /\b(book(s|shop|store)?|librairie|libreria|bouquinistes|artwords)\b/i],
+  ["books", /\b(booksellers?|twelvebooks|t-site)\b/i],
   ["shop", /\b(graphic|watches|magculture|artwords|artazart|tampographe|bouquinistes|whisky|barman|spiritueux|bar tools|salumaio|peck)\b/i],
+  ["shop", /\b(camera|yodobashi|hard off|flea market|antiques|gashapon|muji|beams|kitte|general store|gu tenjin|tamiya|fire kids|d&department|jackroad|maison kitsun\w*)\b|酒販/i],
   ["drink", /\b(bar|bars|wine|cave|cantine|vinaietto|bierbar|pub|royal standard|camparino|liquiderie|apertivo)\b/i],
+  ["drink", /\b(bourbon)\b|酒場/i],
   ["eat", /\b(trattoria|osteria|hosteria|ristorante|restaurant|pizza|pizzeria|bistrot|pasticceria|boulangerie|gelat\w*|rosticceria|salumeria|tapas|michelin|steak|seafood|sandwich\w*|lunch|neve di latte|supplizio|ciacco|sugo|kubri|baratin|tagine|poulette|hood|lao siam|cornichon|pastamadre|marchesi|sant ambroeus|romanè|roscioli|pianostrada|sorpasso|olio|untitled|kalò|januarius|joca|sorbillo|essencia|luminist|toledo|bonvini|pavé|flavio|armando|ciambella|matarel|latteria|madonnina|panciroli|tina|notte|paradiso|sandì|masuelli|arena|giacomo|santa lucia|cendrillon|combat|parizot|french bastards|deux amis|petit grain|goncourt|utopie)\b/i],
+  ["eat", /\b(sushi|ramen|gyoza|gyōza|tonkatsu|yakitori|tempura|curry|tacos?|taqueria|burger|bakery|izakaya|udon|ippudo|ichiran|teppen|kitchen|food stalls|yatai|sangourmand)\b|焼肉|食堂|料理|居酒屋|楽食/i],
   ["see", /\b(museum|museo|musée|church|chiesa|cathedral|cripta|fontana|fountain|piazza|p\.za|palazzo|palais|palace|galleria|gallery|temple|villa|foundation|fondazione|archivio|cemetery|bosco|square|campo|keyhole|sanctuary|pantheon|manor|house|park|village|bibury|appia|ostia|antiquarium|ercolano|presepi|funicolare|borbonica|mouth of truth|curia|triennale|pinacoteca|storehouse|bibliothèque|ateliers|duomo|bletchley|computing|loreto|meter|doll hospital|mercato|bingo|william morris|soane)\b/i],
+  ["see", /\b(shrine|yokocho|ginza|bamboo|pavilion|tower|sight|teamlab|market|shinbashi|cat street|memory lane|hall|ishibe|forest|zombie fish|acros|giant 3d cat|cat shelter)\b/i],
 ];
 
 function guessCategory(name: string, note: string): Category | null {
@@ -183,10 +196,28 @@ async function reverseGeocode(lat: number, lng: number) {
 
 const CITY_NAMES: Record<string, string> = { Milano: "Milan", Roma: "Rome", Napoli: "Naples" };
 
+// Japanese addresses end "..., Shinjuku City, Tokyo 160-0021, Japan" or
+// "..., Nakagyo Ward, Kyoto, 604-8042, Japan", sometimes with a leading 〒.
+// These prefectures are the city we think in; elsewhere (Oita, Shizuoka) the
+// town before the prefecture is (Beppu, Itō).
+const JAPAN_CITY_PREFECTURES = new Set(["Tokyo", "Kyoto", "Osaka", "Fukuoka"]);
+
+function cityFromJapanAddress(parts: string[]) {
+  const cleaned = parts
+    .slice(0, -1)
+    .map((p) => p.replace(/〒/g, "").replace(/\b\d{3}-?\d{4}\b/g, "").trim())
+    .filter(Boolean);
+  const prefecture = cleaned[cleaned.length - 1];
+  if (!prefecture) return null;
+  const city = JAPAN_CITY_PREFECTURES.has(prefecture) ? prefecture : (cleaned[cleaned.length - 2] ?? prefecture);
+  return { city, country: "Japan" };
+}
+
 function cityFromAddress(address: string | null) {
   const parts = address?.split(",").map((s) => s.trim()) ?? [];
   if (parts.length < 2) return null;
   const country = parts[parts.length - 1];
+  if (country === "Japan") return cityFromJapanAddress(parts);
   const raw = parts[parts.length - 2]
     .replace(/^Metropolitan City of (\w+).*$/, "$1")
     .replace(/\b[A-Z0-9]{2,4} ?[0-9][A-Z]{2}\b/, "") // UK postcode
@@ -264,12 +295,38 @@ if (saveError) throw saveError;
 // overflows the URL).
 const { data: spaceSaves, error: saveRowsError } = await supabase
   .from("saves")
-  .select("id, place_id")
+  .select("id, place_id, via, why, category")
   .eq("space_id", spaceId)
   .limit(10_000);
 if (saveRowsError) throw saveRowsError;
 const listPlaceIds = new Set(unique.map((s) => s.place_id));
 const saveRows = spaceSaves.filter((s) => listPlaceIds.has(s.place_id));
+
+// --refresh applies improved guesses to saves already here, but only where we
+// have not touched them: a category still empty, and a note still exactly as
+// Google had it.
+if (values.refresh) {
+  const noteByPlaceId = new Map(located.map((p) => [placeIdByCid.get(p.cid[1]), p.note.trim()]));
+  const guessByPlaceId = new Map(unique.map((s) => [s.place_id, s]));
+  let refreshed = 0;
+  for (const row of saveRows) {
+    const guess = guessByPlaceId.get(row.place_id);
+    if (!guess) continue;
+    const patch: { category?: Category; via?: string; why?: string | null } = {};
+    if (!row.category && guess.category) patch.category = guess.category;
+    const noteUntouched = !row.via && (row.why ?? "") === (noteByPlaceId.get(row.place_id) ?? "");
+    if (noteUntouched && guess.via) Object.assign(patch, { via: guess.via, why: guess.why });
+    if (!Object.keys(patch).length) continue;
+    const { error: patchError } = await supabase
+      .from("saves")
+      .update(patch)
+      .eq("id", row.id)
+      .eq("space_id", spaceId);
+    if (patchError) throw patchError;
+    refreshed++;
+  }
+  console.log(`Refreshed ${refreshed} saves`);
+}
 
 if (values.trip) {
   const { data: existing, error: findError } = await supabase
@@ -291,6 +348,20 @@ if (values.trip) {
     if (createError) throw createError;
     tripId = created.id;
 
+  }
+
+  // Legs come from the cities with five or more places. A new trip gets them;
+  // --refresh rebuilds the undated ones (dated legs are planning, left alone).
+  if (!existing?.id || values.refresh) {
+    if (existing?.id) {
+      const { error: clearError } = await supabase
+        .from("trip_legs")
+        .delete()
+        .eq("trip_id", tripId as string)
+        .eq("space_id", spaceId)
+        .is("starts_on", null);
+      if (clearError) throw clearError;
+    }
     const counts = new Map<string, number>();
     for (const p of located) if (p.city) counts.set(p.city, (counts.get(p.city) ?? 0) + 1);
     const legs = [...counts]
