@@ -1,20 +1,12 @@
 import { requireUser } from "@/lib/auth";
 
+import PoolView from "./pool-view";
+import type { PoolSave } from "./pool-types";
 import { signOut } from "./sign-in/actions";
 
 // Enough for every place two people will save for a long while. Past this the
 // pool needs filtering by city in the query, not just on screen.
 const POOL_LIMIT = 500;
-
-const CATEGORY_LABEL: Record<string, string> = {
-  eat: "Eat",
-  coffee: "Coffee",
-  drink: "Drink",
-  shop: "Shop",
-  see: "See",
-  do: "Do",
-  stay: "Stay",
-};
 
 export default async function PoolPage() {
   const { supabase, user } = await requireUser();
@@ -42,7 +34,7 @@ export default async function PoolPage() {
       supabase
         .from("saves")
         .select(
-          "id, via, why, category, status, added_by, place:places(name, city, country, google_primary_type)",
+          "id, via, why, category, status, added_by, pin_lat, pin_lng, place:places(name, city, lat, lng)",
         )
         .eq("space_id", spaceId)
         .order("added_at", { ascending: false })
@@ -52,50 +44,36 @@ export default async function PoolPage() {
 
   const nameOf = new Map(members.map((m) => [m.user_id, m.display_name]));
 
-  const byCity = new Map<string, typeof saves>();
-  for (const save of saves) {
-    const city = save.place?.city ?? "Somewhere";
-    byCity.set(city, [...(byCity.get(city) ?? []), save]);
-  }
-  const cities = [...byCity.keys()].sort((a, b) => a.localeCompare(b));
+  // Pick exactly what the screen needs; nothing else crosses to the browser.
+  const pool: PoolSave[] = saves.flatMap((s) =>
+    s.place
+      ? [
+          {
+            id: s.id,
+            name: s.place.name,
+            city: s.place.city,
+            category: s.category as PoolSave["category"],
+            status: s.status as PoolSave["status"],
+            via: s.via,
+            why: s.why,
+            addedBy: (s.added_by && nameOf.get(s.added_by)) ?? "someone",
+            lat: s.pin_lat ?? s.place.lat,
+            lng: s.pin_lng ?? s.place.lng,
+            moved: s.pin_lat !== null,
+          },
+        ]
+      : [],
+  );
 
   return (
     <Shell title={membership.spaces?.name ?? "Our places"}>
-      {saves.length === 0 ? (
-        <p className="text-neutral-500">
-          Nothing saved yet. Importing your Google lists comes next.
-        </p>
+      {pool.length === 0 ? (
+        <p className="px-4 text-neutral-500">Nothing saved yet.</p>
       ) : (
-        cities.map((city) => (
-          <section key={city} className="flex flex-col gap-2">
-            <h2 className="text-lg font-semibold">
-              {city} <span className="text-neutral-500">{byCity.get(city)?.length}</span>
-            </h2>
-            <ul className="flex flex-col divide-y divide-neutral-200 dark:divide-neutral-800">
-              {byCity.get(city)?.map((save) => (
-                <li key={save.id} className="flex flex-col gap-0.5 py-2">
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="font-medium">{save.place?.name}</span>
-                    <span className="shrink-0 text-xs text-neutral-500">
-                      {save.category ? (CATEGORY_LABEL[save.category] ?? save.category) : "Unsorted"}
-                      {save.status === "been" ? " · been" : ""}
-                    </span>
-                  </div>
-                  {(save.via || save.why) && (
-                    <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                      {save.via && <span>via {save.via}</span>}
-                      {save.via && save.why && " · "}
-                      {save.why}
-                    </p>
-                  )}
-                  <p className="text-xs text-neutral-500">
-                    added by {(save.added_by && nameOf.get(save.added_by)) ?? "someone"}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))
+        <PoolView
+          initialSaves={pool}
+          mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? null}
+        />
       )}
     </Shell>
   );
@@ -103,9 +81,9 @@ export default async function PoolPage() {
 
 function Shell({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{title}</h1>
+    <main className="mx-auto flex w-full max-w-3xl flex-col">
+      <header className="flex items-center justify-between px-4 py-3">
+        <h1 className="text-xl font-semibold">{title}</h1>
         <form action={signOut}>
           <button className="text-sm text-neutral-500 underline">Sign out</button>
         </form>

@@ -85,6 +85,8 @@ export type Database = {
           added_by: string | null
           category: string | null
           id: string
+          pin_lat: number | null
+          pin_lng: number | null
           place_id: string
           source_url: string | null
           space_id: string
@@ -100,6 +102,8 @@ export type Database = {
           added_by?: string | null
           category?: string | null
           id?: string
+          pin_lat?: number | null
+          pin_lng?: number | null
           place_id: string
           source_url?: string | null
           space_id: string
@@ -115,6 +119,8 @@ export type Database = {
           added_by?: string | null
           category?: string | null
           id?: string
+          pin_lat?: number | null
+          pin_lng?: number | null
           place_id?: string
           source_url?: string | null
           space_id?: string
