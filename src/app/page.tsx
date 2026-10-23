@@ -78,17 +78,22 @@ export default async function PoolPage() {
   );
 
   return (
-    <Shell title={membership.spaces?.name ?? "Our places"}>
-      {pool.length === 0 ? (
-        <p className="px-4 text-neutral-500">Nothing saved yet.</p>
-      ) : (
-        <PoolView
-          initialSaves={pool}
-          trips={trips.map((t) => ({ id: t.id, name: t.name }))}
-          mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? null}
-        />
-      )}
-    </Shell>
+    <PoolView
+      title={membership.spaces?.name ?? "Our places"}
+      initialSaves={pool}
+      trips={trips.map((t) => ({ id: t.id, name: t.name }))}
+      mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? null}
+      nav={
+        <Link href="/trips" className="text-[17px] text-accent">
+          Trips
+        </Link>
+      }
+      footer={
+        <form action={signOut}>
+          <button className="text-[15px] text-secondary">Sign out</button>
+        </form>
+      }
+    />
   );
 }
 

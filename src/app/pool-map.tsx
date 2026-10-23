@@ -12,6 +12,10 @@ type Props = {
   token: string;
   saves: MapPin[];
   selectedId: string | null;
+  // A row the pointer is over in the list; its pin grows to match.
+  hoveredId?: string | null;
+  // Map height covered by the phone sheet, kept clear when fitting pins.
+  bottomInset?: number;
   moving: boolean;
   onSelect: (id: string | null) => void;
   onMove: (pin: { lat: number; lng: number }) => void;
@@ -23,6 +27,11 @@ const colorExpression = [
   ...Object.entries(CATEGORY_COLOR).flat(),
   UNSORTED_COLOR,
 ] as unknown as mapboxgl.ExpressionSpecification;
+
+// Matches --accent in globals.css, light and dark; the map paints outside CSS.
+function accent() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "#3b9bff" : "#0062cc";
+}
 
 function toGeoJSON(saves: MapPin[]): FeatureCollection {
   return {
@@ -44,21 +53,45 @@ function split(saves: MapPin[], selectedId: string | null) {
   };
 }
 
-function fit(map: mapboxgl.Map, saves: MapPin[]) {
-  if (saves.length === 0) return;
-  const bounds = new mapboxgl.LngLatBounds();
-  saves.forEach((s) => bounds.extend([s.lng, s.lat]));
-  map.fitBounds(bounds, { padding: 40, maxZoom: 15, duration: 0 });
+// Frame the dense middle of the places, not every outlier: a day trip to
+// Tivoli or a hotel by the airport should not zoom Rome out to the province.
+function core(saves: MapPin[]) {
+  if (saves.length < 8) return saves;
+  const mid = (xs: number[]) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)];
+  const lat = mid(saves.map((s) => s.lat));
+  const lng = mid(saves.map((s) => s.lng));
+  const far = (s: MapPin) => (s.lat - lat) ** 2 + ((s.lng - lng) * Math.cos((lat * Math.PI) / 180)) ** 2;
+  return [...saves].sort((a, b) => far(a) - far(b)).slice(0, Math.ceil(saves.length * 0.8));
 }
 
-export default function PoolMap({ token, saves, selectedId, moving, onSelect, onMove }: Props) {
+function fit(map: mapboxgl.Map, saves: MapPin[], bottomInset = 0) {
+  if (saves.length === 0) return;
+  const bounds = new mapboxgl.LngLatBounds();
+  core(saves).forEach((s) => bounds.extend([s.lng, s.lat]));
+  map.fitBounds(bounds, {
+    padding: { top: 40, left: 40, right: 40, bottom: 40 + bottomInset },
+    maxZoom: 15,
+    duration: 0,
+  });
+}
+
+export default function PoolMap({
+  token,
+  saves,
+  selectedId,
+  hoveredId = null,
+  bottomInset = 0,
+  moving,
+  onSelect,
+  onMove,
+}: Props) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
   // The map's event handlers outlive renders; they read current props here.
-  const latest = useRef({ saves, selectedId, onSelect, onMove });
+  const latest = useRef({ saves, selectedId, bottomInset, onSelect, onMove });
   useLayoutEffect(() => {
-    latest.current = { saves, selectedId, onSelect, onMove };
+    latest.current = { saves, selectedId, bottomInset, onSelect, onMove };
   });
 
   // Create the map once.
@@ -67,24 +100,34 @@ export default function PoolMap({ token, saves, selectedId, moving, onSelect, on
     mapboxgl.accessToken = token;
     const map = new mapboxgl.Map({
       container: container.current,
-      style: "mapbox://styles/mapbox/light-v11",
-      attributionControl: true,
+      // Chosen once at load; switching styles later would drop our layers.
+      style: window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "mapbox://styles/mapbox/dark-v11"
+        : "mapbox://styles/mapbox/light-v11",
+      // The phone sheet covers the bottom of the map, so Mapbox's logo and
+      // credits sit at the top, where they stay visible.
+      attributionControl: false,
+      logoPosition: "top-left",
     });
     mapRef.current = map;
+    map.addControl(new mapboxgl.AttributionControl({ compact: true }), "top-left");
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
 
     map.on("load", () => {
       const { rest, selected } = split(latest.current.saves, latest.current.selectedId);
-      // Zoomed out, nearby pins merge into a numbered bubble; past street
-      // level (zoom 14) every pin stands alone.
+      // Zoomed out, nearby pins merge into a numbered bubble; past
+      // neighbourhood level (zoom 14) every pin stands alone.
       map.addSource("saves", {
         type: "geojson",
         data: rest,
         cluster: true,
         clusterMaxZoom: 13,
-        clusterRadius: 36,
+        clusterRadius: 24,
       });
       map.addSource("selected", { type: "geojson", data: selected });
+      // Hovered from the list, drawn on its own like the selection so it
+      // shows even when its pin is inside a cluster bubble.
+      map.addSource("hovered", { type: "geojson", data: toGeoJSON([]) });
 
       map.addLayer({
         id: "clusters",
@@ -111,6 +154,21 @@ export default function PoolMap({ token, saves, selectedId, moving, onSelect, on
         },
         paint: { "text-color": "#fff" },
       });
+      // A soft shadow under each pin, then the pin: big enough to read and
+      // tap on a phone in the street.
+      map.addLayer({
+        id: "saves-shadow",
+        type: "circle",
+        source: "saves",
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-color": "#000",
+          "circle-opacity": 0.22,
+          "circle-radius": 10,
+          "circle-blur": 0.6,
+          "circle-translate": [0, 1.5],
+        },
+      });
       map.addLayer({
         id: "saves",
         type: "circle",
@@ -118,9 +176,20 @@ export default function PoolMap({ token, saves, selectedId, moving, onSelect, on
         filter: ["!", ["has", "point_count"]],
         paint: {
           "circle-color": colorExpression,
-          "circle-radius": 6,
+          "circle-radius": 8,
           "circle-stroke-color": "#fff",
-          "circle-stroke-width": 1.5,
+          "circle-stroke-width": 2.5,
+        },
+      });
+      map.addLayer({
+        id: "hovered",
+        type: "circle",
+        source: "hovered",
+        paint: {
+          "circle-color": colorExpression,
+          "circle-radius": 11,
+          "circle-stroke-color": "#fff",
+          "circle-stroke-width": 3,
         },
       });
       map.addLayer({
@@ -129,15 +198,25 @@ export default function PoolMap({ token, saves, selectedId, moving, onSelect, on
         source: "selected",
         paint: {
           "circle-color": colorExpression,
-          "circle-radius": 9,
-          "circle-stroke-color": "#111",
-          "circle-stroke-width": 3,
+          "circle-radius": 12,
+          "circle-stroke-color": accent(),
+          "circle-stroke-width": 4,
         },
       });
-      fit(map, latest.current.saves);
+      fit(map, latest.current.saves, latest.current.bottomInset);
 
-      map.on("click", "saves", (e) => {
-        const id = e.features?.[0]?.properties?.id;
+      // Hit-test a padded box around the tap, so a thumb need not land on
+      // the pin itself.
+      map.on("click", (e) => {
+        const { x, y } = e.point;
+        const hit = map.queryRenderedFeatures(
+          [
+            [x - 12, y - 12],
+            [x + 12, y + 12],
+          ],
+          { layers: ["saves"] },
+        );
+        const id = hit[0]?.properties?.id;
         if (typeof id === "string") latest.current.onSelect(id);
       });
       // Tapping a bubble zooms in until it breaks apart.
@@ -178,8 +257,14 @@ export default function PoolMap({ token, saves, selectedId, moving, onSelect, on
     const map = mapRef.current;
     // isStyleLoaded() is briefly false right after setData, so check for the
     // source instead: it exists once the map has loaded.
-    if (map?.getSource("saves")) fit(map, latest.current.saves);
+    if (map?.getSource("saves")) fit(map, latest.current.saves, latest.current.bottomInset);
   }, [idsKey]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const hovered = latest.current.saves.filter((s) => s.id === hoveredId && s.id !== selectedId);
+    (map?.getSource("hovered") as mapboxgl.GeoJSONSource | undefined)?.setData(toGeoJSON(hovered));
+  }, [hoveredId, selectedId]);
 
   // Bring the selected place into view when the selection changes (not when
   // its pin moves, hence reading saves through the ref).
@@ -187,8 +272,13 @@ export default function PoolMap({ token, saves, selectedId, moving, onSelect, on
     const map = mapRef.current;
     const save = latest.current.saves.find((s) => s.id === selectedId);
     if (!map || !save) return;
-    if (!map.getBounds()?.contains([save.lng, save.lat])) {
-      map.easeTo({ center: [save.lng, save.lat], zoom: Math.max(map.getZoom(), 14) });
+    // Zoom in too when it is on screen but hidden inside a cluster bubble.
+    if (!map.getBounds()?.contains([save.lng, save.lat]) || map.getZoom() < 14) {
+      map.easeTo({
+        center: [save.lng, save.lat],
+        zoom: Math.max(map.getZoom(), 15),
+        padding: { top: 0, left: 0, right: 0, bottom: latest.current.bottomInset },
+      });
     }
   }, [selectedId]);
 
@@ -200,7 +290,7 @@ export default function PoolMap({ token, saves, selectedId, moving, onSelect, on
     const save = latest.current.saves.find((s) => s.id === selectedId);
     if (!map || !moving || !save) return;
 
-    const marker = new mapboxgl.Marker({ draggable: true, color: "#111" })
+    const marker = new mapboxgl.Marker({ draggable: true, color: accent() })
       .setLngLat([save.lng, save.lat])
       .addTo(map);
     marker.on("dragend", () => {

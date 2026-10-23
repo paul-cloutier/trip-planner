@@ -1,0 +1,62 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-23T20:17:44.031Z",
+        "reason": "Claude: decision sketch rows are fixed 56px with grid-centred text, detector reads the row rule as flush"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-10-23T20:17:44.053Z",
+        "reason": "Claude: decision sketch rows are fixed 56px with grid-centred text, detector reads the row rule as flush"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/canon.html"
+        ],
+        "createdAt": "2026-10-23T20:17:44.074Z",
+        "reason": "Claude: decision sketch rows are fixed 56px with grid-centred text, detector reads the row rule as flush"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-23T20:58:07.149Z",
+        "reason": "Claude: unchosen decision-round sketch for another visual world; its fonts are deliberately outside DESIGN.md"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/model-pick.html"
+        ],
+        "createdAt": "2026-10-23T20:58:07.183Z",
+        "reason": "Claude: unchosen decision-round sketch for another visual world; its fonts are deliberately outside DESIGN.md"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-transit.html"
+        ],
+        "createdAt": "2026-10-23T20:58:07.211Z",
+        "reason": "Claude: unchosen decision-round sketch for another visual world; its fonts are deliberately outside DESIGN.md"
+      }
+    ]
+  }
+}
