@@ -43,13 +43,14 @@ export const metadata: Metadata = {
   icons: { apple: "/apple-touch-icon.png" },
 };
 
-// cover lets the page use the whole screen (the tab bar already respects the
-// bottom inset); no zoom stops iOS from magnifying on focus and double tap.
+// No viewport-fit=cover, on purpose: with it iOS 26 lets content run under the
+// status bar and blurs it (the glass edge). Without it the status bar stays
+// outside the page, so nothing sits beneath to blur. No zoom stops iOS from
+// magnifying on focus and double tap.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#1c1c1e" },

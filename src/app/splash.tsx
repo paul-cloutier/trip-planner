@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 // never more than MAX_MS, so a stuck request cannot trap you behind it. It
 // only exists in standalone mode (see the `standalone` variant); in a browser
 // tab it is display:none.
-const MIN_MS = 3000;
+const MIN_MS = 2000;
 const MAX_MS = 10000;
 const FADE_MS = 300;
 
