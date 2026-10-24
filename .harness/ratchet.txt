@@ -1,11 +1,15 @@
 any-types|.claude/skills/impeccable/scripts/live-browser.js|1
 html-injection|.claude/skills/impeccable/scripts/live-browser.js|43
 public-endpoints|src/app/sign-in/actions.ts|1
+~client-components|src/app/app-nav.tsx|1
 ~client-components|src/app/error.tsx|1
 ~client-components|src/app/place-search.tsx|1
 ~client-components|src/app/pool-map.tsx|1
 ~client-components|src/app/pool-view.tsx|1
 ~client-components|src/app/sign-in/page.tsx|1
+~client-components|src/app/trips/[id]/day-board.tsx|1
+~client-components|src/app/trips/[id]/leg-calendar.tsx|1
 ~client-components|src/app/trips/[id]/trip-view.tsx|1
+~client-components|src/app/trips/trip-stack.tsx|1
 ~console-logs|.claude/skills/impeccable/scripts/live-browser.js|14
 ~todo-markers|.claude/skills/impeccable/scripts/live-browser.js|1

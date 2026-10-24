@@ -84,16 +84,8 @@ export default async function PoolPage() {
       initialSaves={pool}
       trips={trips.map((t) => ({ id: t.id, name: t.name }))}
       mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? null}
-      nav={
-        <Link href="/trips" className="text-[17px] text-accent">
-          Trips
-        </Link>
-      }
-      footer={
-        <form action={signOut}>
-          <button className="text-[15px] text-secondary">Sign out</button>
-        </form>
-      }
+      nav={null}
+      footer={null}
     />
   );
 }

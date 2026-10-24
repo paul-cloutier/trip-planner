@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
@@ -70,19 +69,18 @@ export default async function TripPage({ params }: PageProps<"/trips/[id]">) {
   );
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-3">
-      <header className="flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold">{trip.name}</h1>
-        <Link href="/trips" className="shrink-0 text-sm underline">
-          All trips
-        </Link>
-      </header>
-      <TripView
-        tripId={trip.id}
-        legs={tripLegs}
-        items={tripItems}
-        mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? null}
-      />
-    </main>
+    <div className="min-h-dvh bg-grouped">
+      <main className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-3 max-lg:pb-[var(--nav-inset)] lg:max-w-6xl lg:pt-16">
+        <header>
+          <h1 className="text-[22px] leading-tight font-bold tracking-tight">{trip.name}</h1>
+        </header>
+        <TripView
+          tripId={trip.id}
+          legs={tripLegs}
+          items={tripItems}
+          mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? null}
+        />
+      </main>
+    </div>
   );
 }
