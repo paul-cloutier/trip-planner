@@ -18,7 +18,7 @@ export default async function TripsPage() {
   if (error) throw new Error("Could not load trips");
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-3">
+    <main className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-3 max-lg:pb-[var(--nav-inset)] lg:pt-16">
       <header className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Trips</h1>
         <Link href="/" className="text-sm underline">

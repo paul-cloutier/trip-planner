@@ -27,7 +27,9 @@ const PoolMap = dynamic(() => import("./pool-map"), {
 // The phone sheet rests at one of three heights. Peek shows the title and the
 // search field; half shows a handful of rows over the map; full is the list.
 type Detent = "peek" | "half" | "full";
-const PEEK = 124;
+// The tab bar floats over the bottom of the sheet, so peek leaves room for it.
+const NAV = 84;
+const PEEK = 124 + NAV;
 const TOP_GAP = 48;
 
 function detentHeight(detent: Detent, viewport: number) {
@@ -241,7 +243,7 @@ export default function PoolView({
   const onSearchOpen = useCallback((open: boolean) => setSearching(open), []);
 
   return (
-    <div className="relative h-dvh overflow-hidden bg-grouped lg:flex">
+    <div className="relative h-dvh overflow-hidden bg-grouped lg:mt-[52px] lg:flex lg:h-[calc(100dvh-52px)]">
       <div className="absolute inset-0 lg:static lg:order-2 lg:flex-1">
         {mapboxToken ? (
           <PoolMap
@@ -472,13 +474,13 @@ export default function PoolView({
 // positions are CSS, so the first paint is already in place; pixels only
 // take over mid-drag.
 const REST: Record<Detent, string> = {
-  peek: `calc(100% - ${PEEK}px)`,
+  peek: "calc(100% - 124px - var(--nav-inset))",
   half: "calc(100% - 50dvh)",
   full: "0px",
 };
 
 const HIDDEN: Record<Detent, string> = {
-  peek: `calc(100dvh - ${TOP_GAP + PEEK}px)`,
+  peek: `calc(100dvh - ${TOP_GAP + 124}px - var(--nav-inset))`,
   half: `calc(50dvh - ${TOP_GAP}px)`,
   full: "0px",
 };
@@ -579,7 +581,7 @@ function Sheet({
       {/* Below full height part of the sheet sits off screen; pad the list by
           that much so its last rows can still scroll into view. */}
       <div
-        className="min-h-0 flex-1 overflow-y-auto overscroll-contain max-lg:pb-[var(--sheet-hidden)]"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain max-lg:pb-[calc(var(--sheet-hidden)+var(--nav-inset))]"
         style={{ "--sheet-hidden": HIDDEN[detent] } as React.CSSProperties}
       >
         {children}

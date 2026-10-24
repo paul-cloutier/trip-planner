@@ -29,6 +29,11 @@
   --pressed-edge: inset 0 1px 0 rgb(255 255 255 / 0.22), 0 3px 10px -3px rgb(0 98 204 / 0.55);
   --raised: linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%);
   --raised-edge: 0 1px 2px rgb(0 0 0 / 0.1), 0 3px 8px -2px rgb(0 0 0 / 0.12);
+
+  /* Room the phone tab bar takes at the bottom: 60px bar, 12px gap each side.
+     Anything pinned to the bottom of the screen clears it. */
+  --nav-inset: calc(84px + env(safe-area-inset-bottom, 0px));
+  --float-shadow: 0 8px 24px rgb(0 0 0 / 0.18), 0 1px 3px rgb(0 0 0 / 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -56,6 +61,7 @@
     --pressed-edge: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 3px 10px -3px rgb(0 0 0 / 0.6);
     --raised: linear-gradient(180deg, #4a4a4e 0%, #3e3e42 100%);
     --raised-edge: 0 1px 2px rgb(0 0 0 / 0.4), 0 3px 8px -2px rgb(0 0 0 / 0.4);
+    --float-shadow: 0 8px 24px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.4);
   }
 }
 
@@ -106,6 +112,17 @@
 @utility material {
   background-color: var(--background);
   box-shadow: var(--material-edge), var(--sheet-shadow);
+  @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+    background-color: var(--material);
+    -webkit-backdrop-filter: var(--material-filter);
+    backdrop-filter: var(--material-filter);
+  }
+}
+
+/* The phone tab bar: the same frosted material, lifted off the screen. */
+@utility floating {
+  background-color: var(--background);
+  box-shadow: var(--material-edge), var(--float-shadow);
   @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
     background-color: var(--material);
     -webkit-backdrop-filter: var(--material-filter);
