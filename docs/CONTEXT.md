@@ -77,8 +77,9 @@ coordinates, Google's cid, our note, when it was added and who added it.
 
 - Notes split into via and why ("Danielle- great steak frites"). A lone "A" is
   Alana signing her note and is dropped.
-- City from the address, else OpenStreetMap (Photon reverse lookup, no token)
-  for places Google gave only coordinates, else the nearest place with a city. Category is a keyword guess; the rest land
+- City from the address, else the nearest place with a city, else OpenStreetMap
+  (Photon reverse lookup, no token) for places with neither. Photon names
+  neighbourhoods, so it goes last. Category is a keyword guess; the rest land
   unsorted for us to sort by hand.
 - Italy France UK trip and Japan are in. The scripts stay for as long as we
   keep bringing Google lists across.

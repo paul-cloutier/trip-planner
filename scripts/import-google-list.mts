@@ -8,7 +8,8 @@
 //     --trip
 //
 // Each --member maps the name Google shows for whoever added a place to the
-// email of their account here. Both accounts must be in the same space.
+// email of their account here (or their display name, to skip the email). Both
+// accounts must be in the same space.
 // Safe to re-run: places upsert on Google's cid; saves already here are left
 // exactly as we have edited them.
 //
@@ -20,9 +21,9 @@
 // an empty category, a note still as Google had it. With --trip it also
 // rebuilds the trip's undated legs from the current cities.
 //
-// City comes from the address where there is one, then from OpenStreetMap's
-// reverse lookup (Photon) for places Google gave only coordinates, and
-// finally from the nearest place that does have a city. Category is a guess from the name and
+// City comes from the address where there is one, then from the nearest place
+// that does have a city, and finally from OpenStreetMap's reverse lookup
+// (Photon) for places with neither. Category is a guess from the name and
 // note; anything it cannot place is left unsorted for us to sort.
 
 import { readFileSync } from "node:fs";
@@ -76,21 +77,36 @@ const supabase = createClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABA
 
 // --- who added it -----------------------------------------------------------
 
-const emailByName = new Map(
+// --member "Google name=email" finds the account by email. --member "Google
+// name=Display name" (no @) finds it by the display name in space_members,
+// which is how to reach local accounts without knowing their emails.
+const accountByName = new Map(
   values.member.map((m) => {
-    const [name, email] = m.split("=");
-    return [name.trim(), email.trim().toLowerCase()];
+    const [name, account] = m.split("=");
+    return [name.trim(), account.trim()];
   }),
 );
 
-const { data: users, error: usersError } = await supabase.auth.admin.listUsers({ perPage: 100 });
-if (usersError) throw usersError;
-
 const userIdByName = new Map<string, string>();
-for (const [name, email] of emailByName) {
-  const user = users.users.find((u) => u.email?.toLowerCase() === email);
-  if (!user) throw new Error(`No account for ${email}`);
-  userIdByName.set(name, user.id);
+const needsEmail = [...accountByName.values()].some((a) => a.includes("@"));
+const users = needsEmail ? await supabase.auth.admin.listUsers({ perPage: 100 }) : null;
+if (users?.error) throw users.error;
+
+for (const [name, account] of accountByName) {
+  if (account.includes("@")) {
+    const user = users?.data.users.find((u) => u.email?.toLowerCase() === account.toLowerCase());
+    if (!user) throw new Error(`No account for ${account}`);
+    userIdByName.set(name, user.id);
+    continue;
+  }
+  const { data: byDisplay, error: displayError } = await supabase
+    .from("space_members")
+    .select("user_id")
+    .eq("display_name", account)
+    .limit(2);
+  if (displayError) throw displayError;
+  if (byDisplay.length !== 1) throw new Error(`Display name "${account}" matches ${byDisplay.length} members`);
+  userIdByName.set(name, byDisplay[0].user_id);
 }
 
 const { data: memberships, error: membershipError } = await supabase
@@ -271,7 +287,7 @@ async function reverseOsm(lat: number, lng: number) {
 
 const located = [];
 for (const p of places) {
-  const where = cityFromAddress(p.address) ?? (await reverseOsm(p.lat, p.lng));
+  const where = cityFromAddress(p.address);
   located.push({ ...p, city: where?.city ?? null, country: where?.country ?? null });
 }
 for (const p of located) {
@@ -280,6 +296,14 @@ for (const p of located) {
     .filter((q) => q.city && q !== p)
     .sort((a, b) => km(p, a) - km(p, b))[0];
   if (near && km(p, near) < 30) Object.assign(p, { city: near.city, country: near.country });
+}
+// Last resort, for places with no address and no neighbour that has one (a
+// whole list of bare coordinates). Photon names neighbourhoods and boroughs, so
+// it only gets asked once the cheaper answers have run out.
+for (const p of located) {
+  if (p.city) continue;
+  const where = await reverseOsm(p.lat, p.lng);
+  if (where) Object.assign(p, { city: where.city, country: where.country });
 }
 
 // --- write ------------------------------------------------------------------
