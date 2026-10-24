@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { requireUser } from "@/lib/auth";
+import { requireSpace } from "@/lib/space";
 
 const CATEGORIES = ["eat", "coffee", "drink", "shop", "records", "books", "see", "stay"] as const;
 
@@ -26,19 +26,11 @@ const updateSaveSchema = z
 // Change a save: category, pin, want/been, via and why. Only the fields given. Members of the save's space only:
 // the update is scoped to the caller's space in the query, and RLS backs it.
 export async function updateSave(input: z.input<typeof updateSaveSchema>) {
-  const { supabase, user } = await requireUser();
+  const { supabase, spaceId } = await requireSpace();
 
   const parsed = updateSaveSchema.safeParse(input);
-  if (!parsed.success) return { ok: false as const };
+  if (!spaceId || !parsed.success) return { ok: false as const };
   const { saveId, category, pin, status, via, why } = parsed.data;
-
-  const { data: membership } = await supabase
-    .from("space_members")
-    .select("space_id")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  if (!membership) return { ok: false as const };
 
   const changes: {
     category?: (typeof CATEGORIES)[number] | null;
@@ -66,7 +58,7 @@ export async function updateSave(input: z.input<typeof updateSaveSchema>) {
     .from("saves")
     .update(changes, { count: "exact" })
     .eq("id", saveId)
-    .eq("space_id", membership.space_id);
+    .eq("space_id", spaceId);
   if (error || count !== 1) {
     console.error("updateSave failed", error?.code, count);
     return { ok: false as const };
