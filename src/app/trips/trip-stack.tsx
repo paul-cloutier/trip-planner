@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 
 // Trips as a wallet of cards. The selected card sits up front at full height;
-// the ones after it stack below with just their title strip showing, the ones
-// before it tuck behind with a sliver. Tap a strip to bring it forward, tap
-// the front card to open the trip.
+// every other card is a stacked title strip, those before it above and those
+// after it below. Tap a strip to bring it forward, tap the front card to open
+// the trip.
 export type StackTrip = {
   id: string;
   name: string;
@@ -18,8 +18,6 @@ export type StackTrip = {
 const CARD_H = 280;
 const PEEK = 64; // title strip of a card waiting in the stack
 const LAP = 24; // how far a card runs under the next one, to hide its corners
-const TOP = 10; // sliver of each card tucked behind the front one
-const BEHIND = 4; // most slivers shown
 const GAP = 10;
 const EASE = "cubic-bezier(0.32, 0.72, 0, 1)";
 
@@ -33,7 +31,7 @@ export default function TripStack({ trips }: { trips: StackTrip[] }) {
   const [selected, setSelected] = useState(0);
   const sel = Math.min(selected, trips.length - 1);
   const after = trips.length - 1 - sel;
-  const selY = Math.min(sel, BEHIND) * TOP;
+  const selY = sel * PEEK;
   const height = selY + CARD_H + (after > 0 ? GAP + after * PEEK + LAP : 0);
 
   return (
@@ -43,14 +41,8 @@ export default function TripStack({ trips }: { trips: StackTrip[] }) {
     >
       {trips.map((trip, i) => {
         const front = i === sel;
-        const behind = sel - i;
-        const y = front
-          ? selY
-          : behind > 0
-            ? selY - Math.min(behind, BEHIND) * TOP
-            : selY + CARD_H + GAP + (i - sel - 1) * PEEK;
-        const scale = behind > 0 ? 1 - Math.min(behind, BEHIND) * 0.03 : 1;
-        const z = front ? 50 : behind > 0 ? i : 60 + i;
+        const y = front ? selY : i < sel ? i * PEEK : selY + CARD_H + GAP + (i - sel - 1) * PEEK;
+        const z = front ? 50 : i < sel ? i : 60 + i;
 
         const surface = (
           <div className="absolute inset-x-0 top-0 text-white" style={{ height: CARD_H }}>
@@ -89,7 +81,7 @@ export default function TripStack({ trips }: { trips: StackTrip[] }) {
             className="absolute inset-x-0 top-0 origin-top overflow-hidden rounded-[22px] shadow-[0_6px_20px_rgb(0_0_0/0.28)] motion-safe:transition-[transform,height] motion-safe:duration-500"
             style={{
               height: front ? CARD_H : PEEK + LAP,
-              transform: `translateY(${y}px) scale(${scale})`,
+              transform: `translateY(${y}px)`,
               zIndex: z,
               transitionTimingFunction: EASE,
             }}
