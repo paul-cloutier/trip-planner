@@ -296,7 +296,7 @@ export default function PoolView({
         ) : searching ? null : (
           <>
             <div className="flex items-center gap-2 px-4 pb-2.5">
-              <label className="relative inline-flex h-9 min-w-0 items-center rounded-full bg-fill pr-8 pl-3.5 text-[15px] font-semibold">
+              <label className="relative inline-flex h-9 min-w-0 items-center rounded-full control pr-8 pl-3.5 text-[15px] font-semibold">
                 <select
                   aria-label="City"
                   value={city ?? ""}
@@ -423,10 +423,12 @@ export default function PoolView({
                     >
                       <span className="flex w-10 shrink-0 items-center justify-center pl-1">
                         <span
-                          className="h-3 w-3 rounded-full"
-                          style={{
-                            background: s.category ? CATEGORY_COLOR[s.category] : UNSORTED_COLOR,
-                          }}
+                          className="dot h-3 w-3 rounded-full"
+                          style={
+                            {
+                              "--dot": s.category ? CATEGORY_COLOR[s.category] : UNSORTED_COLOR,
+                            } as React.CSSProperties
+                          }
                           aria-hidden
                         />
                       </span>
@@ -548,7 +550,7 @@ function Sheet({
   return (
     <div
       ref={sheet}
-      className="fixed inset-x-0 bottom-0 z-10 flex h-[calc(100dvh-48px)] flex-col rounded-t-[14px] bg-background shadow-[var(--sheet-shadow)] max-lg:[transform:translateY(var(--sheet-y))] motion-safe:transition-transform motion-safe:duration-[420ms] motion-safe:ease-[cubic-bezier(0.32,0.72,0,1)] lg:static lg:order-1 lg:h-full lg:w-[400px] lg:shrink-0 lg:rounded-none lg:border-r lg:border-separator lg:shadow-none"
+      className="fixed inset-x-0 bottom-0 z-10 flex h-[calc(100dvh-48px)] flex-col rounded-t-sheet max-lg:material lg:bg-background lg:[background-image:var(--column)] max-lg:[transform:translateY(var(--sheet-y))] motion-safe:transition-transform motion-safe:duration-[420ms] motion-safe:ease-[cubic-bezier(0.32,0.72,0,1)] lg:static lg:order-1 lg:h-full lg:w-[400px] lg:shrink-0 lg:rounded-none lg:border-r lg:border-separator lg:shadow-none"
       style={{ "--sheet-y": REST[detent] } as React.CSSProperties}
     >
       <div
@@ -601,12 +603,12 @@ function Chip({
     <button
       onClick={onClick}
       aria-pressed={active}
-      className="group flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-fill px-3.5 text-[15px] font-medium aria-pressed:bg-accent aria-pressed:text-white"
+      className="group flex h-9 shrink-0 items-center gap-1.5 rounded-full control px-3.5 text-[15px] font-medium aria-pressed:pressed"
     >
       {color && (
         <span
-          className="h-2.5 w-2.5 rounded-full ring-1 ring-white/70 group-aria-pressed:ring-[1.5px] group-aria-pressed:ring-white"
-          style={{ background: color }}
+          className="dot h-2.5 w-2.5 rounded-full ring-1 ring-white/70 group-aria-pressed:ring-[1.5px] group-aria-pressed:ring-white"
+          style={{ "--dot": color } as React.CSSProperties}
           aria-hidden
         />
       )}
@@ -669,7 +671,7 @@ function PlaceDetail({
         <button
           onClick={onClose}
           aria-label="Close"
-          className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full bg-fill text-secondary"
+          className="grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full control text-secondary"
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" aria-hidden>
             <path d="M6 6l12 12M18 6 6 18" />
@@ -677,13 +679,13 @@ function PlaceDetail({
         </button>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 rounded-[9px] bg-fill p-0.5" role="group" aria-label="Want or been">
+      <div className="mt-4 grid grid-cols-2 rounded-segmented control p-0.5" role="group" aria-label="Want or been">
         {(["want", "been"] as const).map((st) => (
           <button
             key={st}
             onClick={() => onStatus(st)}
             aria-pressed={save.status === st}
-            className="h-8 rounded-[7px] text-[15px] font-medium aria-pressed:bg-background aria-pressed:font-semibold aria-pressed:shadow-[0_1px_3px_rgb(0_0_0/0.12)]"
+            className="h-8 rounded-segment text-[15px] font-medium aria-pressed:raised aria-pressed:font-semibold"
           >
             {st === "want" ? "Want to go" : "Been"}
           </button>
@@ -707,7 +709,7 @@ function PlaceDetail({
                 name="via"
                 defaultValue={save.via ?? ""}
                 maxLength={200}
-                className="h-11 rounded-[10px] bg-fill px-3 text-[17px] outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="h-11 rounded-control control px-3 text-[17px] outline-none focus-visible:ring-2 focus-visible:ring-accent"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -717,24 +719,24 @@ function PlaceDetail({
                 defaultValue={save.why ?? ""}
                 maxLength={2000}
                 rows={3}
-                className="rounded-[10px] bg-fill px-3 py-2.5 text-[17px] outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="rounded-control control px-3 py-2.5 text-[17px] outline-none focus-visible:ring-2 focus-visible:ring-accent"
               />
             </label>
             <div className="flex gap-2">
-              <button className="h-11 flex-1 rounded-[10px] bg-accent text-[17px] font-semibold text-white">
+              <button className="h-11 flex-1 rounded-control pressed text-[17px] font-semibold">
                 Save
               </button>
               <button
                 type="button"
                 onClick={() => onEditNote(false)}
-                className="h-11 flex-1 rounded-[10px] bg-fill text-[17px] text-accent"
+                className="h-11 flex-1 rounded-control control text-[17px] text-accent"
               >
                 Cancel
               </button>
             </div>
           </form>
         ) : (
-          <div className="rounded-[10px] bg-grouped px-3.5 py-3 text-[17px]">
+          <div className="rounded-card card px-3.5 py-3 text-[17px]">
             <p>
               <span className="text-secondary">Added by </span>
               {save.addedBy}
@@ -778,13 +780,13 @@ function PlaceDetail({
               <Link
                 key={t.id}
                 href={`/trips/${t.id}`}
-                className="flex h-9 items-center rounded-full bg-accent-tint px-3.5 text-[15px] font-medium text-accent"
+                className="flex h-9 items-center rounded-full bg-accent-tint px-3.5 text-[15px] font-medium text-accent shadow-[var(--control-edge)]"
               >
                 In {t.name}
               </Link>
             ))}
             {otherTrips.length > 0 && (
-              <label className="relative flex h-9 items-center rounded-full bg-fill px-3.5 text-[15px] font-medium text-accent">
+              <label className="relative flex h-9 items-center rounded-full control px-3.5 text-[15px] font-medium text-accent">
                 Add to trip
                 <select
                   value=""
