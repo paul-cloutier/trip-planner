@@ -173,11 +173,13 @@
     /* No rubber-band bounce or pull-to-refresh: it is an app, not a page.
        Inner scrollers keep their own contain. */
     overscroll-behavior: none;
-    background: var(--background);
+    /* The same grey as the pages. On iOS the status bar takes its colour from
+       here, so it reads as part of the page rather than a white strip. */
+    background: var(--grouped);
   }
 
   body {
-    background: var(--background);
+    background: var(--grouped);
     color: var(--foreground);
     font-family: var(--font-sans);
   }

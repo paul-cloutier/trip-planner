@@ -42,8 +42,8 @@ export default async function TripsPage() {
 
   return (
     <div className="min-h-dvh bg-grouped">
-      <main className="mx-auto flex w-full max-w-lg flex-col gap-5 px-4 py-3 max-lg:pb-[var(--nav-inset)] lg:pt-16">
-        <header>
+      <main className="mx-auto flex w-full max-w-lg flex-col gap-5 px-4 pb-3 max-lg:pb-[var(--nav-inset)] lg:pt-16">
+        <header className="sticky top-0 z-20 -mx-4 bg-grouped px-4 pt-3 pb-2 standalone:max-lg:pt-10 lg:top-[52px] lg:pt-0">
           <h1 className="text-xl font-semibold">Trips</h1>
         </header>
 

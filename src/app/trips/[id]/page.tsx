@@ -70,8 +70,8 @@ export default async function TripPage({ params }: PageProps<"/trips/[id]">) {
 
   return (
     <div className="min-h-dvh bg-grouped">
-      <main className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-3 max-lg:pb-[var(--nav-inset)] lg:max-w-none lg:px-6 lg:pt-16">
-        <header>
+      <main className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 pb-3 max-lg:pb-[var(--nav-inset)] lg:max-w-none lg:px-6 lg:pt-16">
+        <header className="sticky top-0 z-20 -mx-4 bg-grouped px-4 pt-3 pb-2 standalone:max-lg:pt-10 lg:top-[52px] lg:-mx-6 lg:px-6 lg:pt-0">
           <h1 className="text-[22px] leading-tight font-bold tracking-tight">{trip.name}</h1>
         </header>
         <TripView
