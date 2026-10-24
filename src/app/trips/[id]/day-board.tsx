@@ -181,7 +181,7 @@ function Column({
     <div
       {...drop}
       data-over={over}
-      className={`card flex flex-col rounded-card transition-shadow data-[over=true]:ring-2 data-[over=true]:ring-accent lg:max-h-[min(70dvh,40rem)] lg:w-80 lg:shrink-0 ${className}`}
+      className={`card flex flex-col rounded-card transition-shadow data-[over=true]:ring-2 data-[over=true]:ring-accent lg:max-h-[min(70dvh,40rem)] lg:min-w-72 lg:flex-1 lg:basis-72 ${className}`}
     >
       <div className="flex shrink-0 items-baseline justify-between gap-3 px-4 pt-3 pb-1">
         <div className="min-w-0">
