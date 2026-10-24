@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* True only when launched from the home screen, with no browser chrome. */
+@custom-variant standalone (@media (display-mode: standalone));
+
 /* The category standard: system type, grouped greys, one blue. Values follow
    Apple's semantic colours, nudged where text needs 4.5:1. On top of that, a
    little material: a frosted sheet, top-lit controls and softer corners. */
@@ -165,6 +168,12 @@
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-text-size-adjust: 100%;
+    /* No rubber-band bounce or pull-to-refresh: it is an app, not a page.
+       Inner scrollers keep their own contain. */
+    overscroll-behavior: none;
+    background: var(--background);
   }
 
   body {
