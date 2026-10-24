@@ -8,7 +8,7 @@
 | Actor | Authenticated? | Can read | Can write | Notes |
 |---|---|---|---|---|
 | Anonymous visitor | no | nothing (sign-in page only: password or emailed code) | nothing | Shared guides will add a read-only public path later |
-| Space member | yes (email code) | their space, its members, its saves; all places | saves in their space; rename their space | No open sign-up: accounts are created by hand |
+| Space member | yes (email code) | their space, its members, its saves, trips; places only while their space has a save on one | saves in their space; rename their space | No open sign-up: accounts are created by hand |
 | Server code (service role) | secret key | everything | `places` only, from `addPlace` and the import script | `places` is shared across spaces, so it only ever holds data we fetched from OpenStreetMap ourselves, never values from a request |
 | Me, in Supabase Studio | dashboard login | everything | everything | Creating users and invites, for now |
 
@@ -17,11 +17,15 @@
 - Boundary key: `space_id`.
 - Every table holding user data carries it: `saves`, `space_members`,
   `space_invites`, `trips`, `trip_legs`, `trip_items`. Composite foreign keys
-  stop a leg, item or save from pointing across spaces. Exception: `places` holds only public facts from Google and
-  is shared across spaces. Nothing a person wrote goes in `places`.
+  stop a leg, item or save from pointing across spaces. Exception: `places` holds only public facts and is shared across
+  spaces. Nothing a person wrote goes in `places`. It is readable only through a
+  save in one of your spaces, so a new space sees none of another's places.
 - Enforced in both: row level security through `is_space_member(space_id)`,
   and an explicit `.eq("space_id", …)` in application queries.
 - A query on a user-data table that does not filter by `space_id` is a bug.
+- Which space a request works in is decided in one place, `requireSpace()` in
+  `src/lib/space.ts`. Do not look up `space_members` anywhere else. Later, when
+  someone can belong to several spaces, the active one is picked there.
 
 ## 3. Trust boundaries
 

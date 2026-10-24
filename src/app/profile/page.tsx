@@ -1,17 +1,19 @@
-import { requireUser } from "@/lib/auth";
+import { requireSpace } from "@/lib/space";
 
 import { signOut } from "../sign-in/actions";
 
 // Signed-in members only; requireUser() redirects everyone else to sign in.
 export default async function ProfilePage() {
-  const { supabase, user } = await requireUser();
+  const { supabase, user, spaceId, spaceName, displayName } = await requireSpace();
 
-  const { data: membership, error } = await supabase
-    .from("space_members")
-    .select("display_name, spaces(name)")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
+  const { data: members, error } = spaceId
+    ? await supabase
+        .from("space_members")
+        .select("user_id, display_name")
+        .eq("space_id", spaceId)
+        .order("joined_at", { ascending: true })
+        .limit(20)
+    : { data: [], error: null };
   if (error) throw new Error("Could not load profile");
 
   return (
@@ -19,10 +21,24 @@ export default async function ProfilePage() {
       <h1 className="text-[22px] font-bold tracking-[-0.01em]">Profile</h1>
 
       <dl className="card flex flex-col divide-y divide-separator rounded-card px-4 text-[17px]">
-        <Row label="Name" value={membership?.display_name ?? "—"} />
-        <Row label="Space" value={membership?.spaces?.name ?? "—"} />
+        <Row label="Name" value={displayName ?? "—"} />
         <Row label="Email" value={user.email ?? "—"} />
       </dl>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="px-1 text-[13px] font-semibold tracking-wide text-secondary uppercase">
+          {spaceName ?? "No space"}
+        </h2>
+        <dl className="card flex flex-col divide-y divide-separator rounded-card px-4 text-[17px]">
+          {members.map((m) => (
+            <Row
+              key={m.user_id}
+              label={m.display_name}
+              value={m.user_id === user.id ? "You" : "Member"}
+            />
+          ))}
+        </dl>
+      </section>
 
       <form action={signOut}>
         <button className="control h-11 w-full rounded-control text-[17px] font-semibold text-danger">

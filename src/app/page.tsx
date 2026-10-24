@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { requireUser } from "@/lib/auth";
+import { requireSpace } from "@/lib/space";
 
 import PoolView from "./pool-view";
 import type { PoolSave } from "./pool-types";
@@ -12,20 +12,10 @@ import { signOut } from "./sign-in/actions";
 const POOL_LIMIT = 2000;
 
 export default async function PoolPage() {
-  const { supabase, user } = await requireUser();
-
-  const { data: membership, error: membershipError } = await supabase
-    .from("space_members")
-    .select("space_id, spaces(name)")
-    .eq("user_id", user.id)
-    .limit(1)
-    .maybeSingle();
-  if (membershipError) throw new Error("Could not load space");
-  if (!membership) {
+  const { supabase, spaceId, spaceName } = await requireSpace();
+  if (!spaceId) {
     return <Shell title="Trips">You are not in a space yet.</Shell>;
   }
-
-  const spaceId = membership.space_id;
 
   const [
     { data: members, error: membersError },
@@ -80,7 +70,7 @@ export default async function PoolPage() {
 
   return (
     <PoolView
-      title={membership.spaces?.name ?? "Our places"}
+      title={spaceName ?? "Our places"}
       initialSaves={pool}
       trips={trips.map((t) => ({ id: t.id, name: t.name }))}
       mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? null}
