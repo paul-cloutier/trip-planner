@@ -36,7 +36,7 @@ export default function TripStack({ trips }: { trips: StackTrip[] }) {
 
   return (
     <ul
-      className="relative w-full list-none motion-safe:transition-[height] motion-safe:duration-500"
+      className="relative isolate w-full list-none motion-safe:transition-[height] motion-safe:duration-500"
       style={{ height, transitionTimingFunction: EASE }}
     >
       {trips.map((trip, i) => {

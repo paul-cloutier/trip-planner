@@ -36,17 +36,24 @@ export default function DayBoard({
   onMove: (item: TripItem, day: string | null) => void;
   onRemove: (item: TripItem) => void;
 }) {
-  const canDrag = useSyncExternalStore(subscribe, () => window.matchMedia(FINE_POINTER).matches, () => false);
+  const canDrag = useSyncExternalStore(
+    subscribe,
+    () => window.matchMedia(FINE_POINTER).matches,
+    () => false,
+  );
   const [dragId, setDragId] = useState<string | null>(null);
   const [over, setOver] = useState<string | null>(null);
 
   // On a phone only one day shows: the selected pin's day, else the chip's.
   const selectedDay = items.find((i) => i.id === selectedId)?.day ?? null;
-  const shown = [selectedDay, focusDay].find((d) => d && days.some((x) => x.day === d)) ?? days[0]?.day;
+  const shown =
+    [selectedDay, focusDay].find((d) => d && days.some((x) => x.day === d)) ?? days[0]?.day;
 
   useEffect(() => {
     if (selectedId)
-      document.getElementById(`item-${selectedId}`)?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+      document
+        .getElementById(`item-${selectedId}`)
+        ?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
   }, [selectedId]);
 
   // Shelf grouped by city, the trip's own cities first in leg order.
@@ -106,33 +113,9 @@ export default function DayBoard({
         </p>
       )}
 
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:overflow-x-auto lg:pb-3">
-        {days.map(({ day, cities }) => {
-          const onDay = items.filter((i) => i.day === day);
-          return (
-            <Column
-              key={day}
-              className={day === shown ? "" : "max-lg:hidden"}
-              title={formatDay(day)}
-              sub={cities.join(" → ")}
-              count={onDay.length}
-              empty={
-                <>
-                  <span className="lg:hidden">Nothing planned. Move a place here from Maybe.</span>
-                  <span className="max-lg:hidden">Drag places here</span>
-                </>
-              }
-              {...dropProps(day, day)}
-            >
-              {onDay.map((i) => (
-                <ItemRow key={i.id} item={i} {...rowProps} />
-              ))}
-            </Column>
-          );
-        })}
-
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
         <Column
-          className="max-lg:order-last lg:order-first"
+          className="max-lg:order-last lg:sticky lg:top-16 lg:w-80 lg:shrink-0"
           title="Maybe"
           count={shelfCount}
           empty="Nothing waiting. Add places to this trip from the pool."
@@ -141,7 +124,8 @@ export default function DayBoard({
           {shelf.map(([city, group]) => (
             <li key={city} className="list-none">
               <h4 className="mx-4 pt-3 pb-1 text-[13px] text-secondary">
-                <span className="font-semibold">{city}</span> <span className="tabular-nums">{group.length}</span>
+                <span className="font-semibold">{city}</span>{" "}
+                <span className="tabular-nums">{group.length}</span>
               </h4>
               <ul>
                 {group.map((i) => (
@@ -151,6 +135,34 @@ export default function DayBoard({
             </li>
           ))}
         </Column>
+
+        <div className="flex flex-col gap-3 lg:min-w-0 lg:flex-1 lg:flex-row lg:items-start lg:overflow-x-auto lg:pb-3">
+          {days.map(({ day, cities }) => {
+            const onDay = items.filter((i) => i.day === day);
+            return (
+              <Column
+                key={day}
+                className={`lg:min-w-72 lg:flex-1 lg:basis-72 ${day === shown ? "" : "max-lg:hidden"}`}
+                title={formatDay(day)}
+                sub={cities.join(" → ")}
+                count={onDay.length}
+                empty={
+                  <>
+                    <span className="lg:hidden">
+                      Nothing planned. Move a place here from Maybe.
+                    </span>
+                    <span className="max-lg:hidden">Drag places here</span>
+                  </>
+                }
+                {...dropProps(day, day)}
+              >
+                {onDay.map((i) => (
+                  <ItemRow key={i.id} item={i} {...rowProps} />
+                ))}
+              </Column>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -181,7 +193,7 @@ function Column({
     <div
       {...drop}
       data-over={over}
-      className={`card flex flex-col rounded-card transition-shadow data-[over=true]:ring-2 data-[over=true]:ring-accent lg:max-h-[min(70dvh,40rem)] lg:min-w-72 lg:flex-1 lg:basis-72 ${className}`}
+      className={`card flex flex-col rounded-card transition-shadow data-[over=true]:ring-2 data-[over=true]:ring-accent lg:max-h-[min(70dvh,40rem)] ${className}`}
     >
       <div className="flex shrink-0 items-baseline justify-between gap-3 px-4 pt-3 pb-1">
         <div className="min-w-0">
@@ -248,7 +260,11 @@ function ItemRow({
       <div className="relative flex min-h-14 items-center gap-3 lg:min-h-12">
         <span
           className="dot h-3 w-3 shrink-0 rounded-full"
-          style={{ "--dot": item.category ? CATEGORY_COLOR[item.category] : UNSORTED_COLOR } as React.CSSProperties}
+          style={
+            {
+              "--dot": item.category ? CATEGORY_COLOR[item.category] : UNSORTED_COLOR,
+            } as React.CSSProperties
+          }
           aria-hidden
         />
         <div className="min-w-0 flex-1">
@@ -256,43 +272,64 @@ function ItemRow({
             {item.name}
           </p>
           <p className="truncate text-[15px] text-secondary lg:text-[13px]">
-            {[item.category ? CATEGORY_LABEL[item.category] : "Unsorted", item.city].filter(Boolean).join(" · ")}
+            {[item.category ? CATEGORY_LABEL[item.category] : "Unsorted", item.city]
+              .filter(Boolean)
+              .join(" · ")}
           </p>
         </div>
 
         <div className={`flex shrink-0 items-center gap-2 ${quiet}`}>
-        <span
-          className={`control relative inline-flex h-8 shrink-0 items-center gap-1 rounded-full pr-2 pl-3 text-[13px] font-medium text-accent has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent`}
-        >
-          {item.day ? formatShort(item.day) : "Maybe"}
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-          <select
-            value={item.day ?? ""}
-            onChange={(e) => onMove(item, e.target.value || null)}
-            aria-label={`Day for ${item.name}`}
-            className="absolute inset-0 w-full cursor-pointer opacity-0 focus-visible:outline-none"
+          <span
+            className={`control relative inline-flex h-8 shrink-0 items-center gap-1 rounded-full pr-2 pl-3 text-[13px] font-medium text-accent has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent`}
           >
-            <option value="">Maybe</option>
-            {ordered.map((d) => (
-              <option key={d.day} value={d.day}>
-                {formatDay(d.day)} · {d.cities.join("/")}
-              </option>
-            ))}
-          </select>
-        </span>
+            {item.day ? formatShort(item.day) : "Maybe"}
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+            <select
+              value={item.day ?? ""}
+              onChange={(e) => onMove(item, e.target.value || null)}
+              aria-label={`Day for ${item.name}`}
+              className="absolute inset-0 w-full cursor-pointer opacity-0 focus-visible:outline-none"
+            >
+              <option value="">Maybe</option>
+              {ordered.map((d) => (
+                <option key={d.day} value={d.day}>
+                  {formatDay(d.day)} · {d.cities.join("/")}
+                </option>
+              ))}
+            </select>
+          </span>
 
-        <button
-          type="button"
-          onClick={() => onRemove(item)}
-          aria-label={`Remove ${item.name} from trip`}
-          className={`grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full control text-secondary`}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" aria-hidden>
-            <path d="M6 6l12 12M18 6 6 18" />
-          </svg>
-        </button>
+          <button
+            type="button"
+            onClick={() => onRemove(item)}
+            aria-label={`Remove ${item.name} from trip`}
+            className={`grid h-[30px] w-[30px] shrink-0 place-items-center rounded-full control text-secondary`}
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3.2"
+              strokeLinecap="round"
+              aria-hidden
+            >
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          </button>
         </div>
       </div>
     </li>
