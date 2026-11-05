@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 // The way around the app. On a phone, a floating bar at the bottom. On a
-// laptop, a strip across the top of the window holding a segmented control;
-// pages leave room for its 52px with lg top padding or margin.
+// laptop, a floating pill at the top centre of the window; pages leave room
+// for its 52px with lg top padding or margin, the map page lets it float.
 const TABS = [
   { href: "/", label: "Places", match: (p: string) => p === "/", icon: PlacesIcon },
   { href: "/trips", label: "Trips", match: (p: string) => p.startsWith("/trips"), icon: TripsIcon },
@@ -40,14 +40,17 @@ export default function AppNav() {
         })}
       </nav>
 
-      <div className="fixed inset-x-0 top-0 z-30 hidden h-[52px] items-center justify-center border-b border-separator bg-background px-4 lg:flex">
-        <nav aria-label="Main" className="control grid w-80 grid-cols-3 rounded-segmented p-0.5">
+      <div className="pointer-events-none fixed inset-x-0 top-3 z-30 hidden justify-center px-4 lg:flex">
+        <nav
+          aria-label="Main"
+          className="floating pointer-events-auto grid w-80 grid-cols-3 gap-0.5 rounded-full p-1"
+        >
           {TABS.map(({ href, label, match }) => (
             <Link
               key={href}
               href={href}
               aria-current={match(pathname) ? "page" : undefined}
-              className="flex h-8 items-center justify-center rounded-segment text-[15px] font-medium aria-[current=page]:raised aria-[current=page]:font-semibold"
+              className="flex h-8 items-center justify-center rounded-full text-[15px] font-medium text-secondary aria-[current=page]:pressed aria-[current=page]:font-semibold"
             >
               {label}
             </Link>

@@ -16,6 +16,8 @@ type Props = {
   hoveredId?: string | null;
   // Map height covered by the phone sheet, kept clear when fitting pins.
   bottomInset?: number;
+  // Map width covered by the laptop card, kept clear the same way.
+  leftInset?: number;
   moving: boolean;
   onSelect: (id: string | null) => void;
   onMove: (pin: { lat: number; lng: number }) => void;
@@ -67,12 +69,12 @@ function core(saves: MapPin[]) {
   return [...saves].sort((a, b) => far(a) - far(b)).slice(0, Math.ceil(saves.length * 0.8));
 }
 
-function fit(map: mapboxgl.Map, saves: MapPin[], bottomInset = 0) {
+function fit(map: mapboxgl.Map, saves: MapPin[], bottomInset = 0, leftInset = 0) {
   if (saves.length === 0) return;
   const bounds = new mapboxgl.LngLatBounds();
   core(saves).forEach((s) => bounds.extend([s.lng, s.lat]));
   map.fitBounds(bounds, {
-    padding: { top: 40, left: 40, right: 40, bottom: 40 + bottomInset },
+    padding: { top: 40, left: 40 + leftInset, right: 40, bottom: 40 + bottomInset },
     maxZoom: 15,
     duration: 0,
   });
@@ -84,6 +86,7 @@ export default function PoolMap({
   selectedId,
   hoveredId = null,
   bottomInset = 0,
+  leftInset = 0,
   moving,
   onSelect,
   onMove,
@@ -92,9 +95,9 @@ export default function PoolMap({
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
   // The map's event handlers outlive renders; they read current props here.
-  const latest = useRef({ saves, selectedId, bottomInset, onSelect, onMove });
+  const latest = useRef({ saves, selectedId, bottomInset, leftInset, onSelect, onMove });
   useLayoutEffect(() => {
-    latest.current = { saves, selectedId, bottomInset, onSelect, onMove };
+    latest.current = { saves, selectedId, bottomInset, leftInset, onSelect, onMove };
   });
 
   // Create the map once.
@@ -120,10 +123,10 @@ export default function PoolMap({
       // The phone sheet covers the bottom of the map, so Mapbox's logo and
       // credits sit at the top, where they stay visible.
       attributionControl: false,
-      logoPosition: "top-left",
+      logoPosition: "bottom-right",
     });
     mapRef.current = map;
-    map.addControl(new mapboxgl.AttributionControl({ compact: true }), "top-left");
+    map.addControl(new mapboxgl.AttributionControl({ compact: true }), "bottom-right");
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), "top-right");
 
     map.on("load", () => {
@@ -226,7 +229,7 @@ export default function PoolMap({
           "circle-stroke-width": 4,
         },
       });
-      fit(map, latest.current.saves, latest.current.bottomInset);
+      fit(map, latest.current.saves, latest.current.bottomInset, latest.current.leftInset);
 
       // Hit-test a padded box around the tap, so a thumb need not land on
       // the pin itself.
@@ -288,7 +291,8 @@ export default function PoolMap({
     const map = mapRef.current;
     // isStyleLoaded() is briefly false right after setData, so check for the
     // source instead: it exists once the map has loaded.
-    if (map?.getSource("saves")) fit(map, latest.current.saves, latest.current.bottomInset);
+    if (map?.getSource("saves"))
+      fit(map, latest.current.saves, latest.current.bottomInset, latest.current.leftInset);
   }, [idsKey]);
 
   useEffect(() => {
@@ -308,7 +312,12 @@ export default function PoolMap({
       map.easeTo({
         center: [save.lng, save.lat],
         zoom: Math.max(map.getZoom(), 15),
-        padding: { top: 0, left: 0, right: 0, bottom: latest.current.bottomInset },
+        padding: {
+          top: 0,
+          left: latest.current.leftInset,
+          right: 0,
+          bottom: latest.current.bottomInset,
+        },
       });
     }
   }, [selectedId]);
