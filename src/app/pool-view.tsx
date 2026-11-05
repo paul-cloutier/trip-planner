@@ -154,12 +154,29 @@ export default function PoolView({
 
   // With a position, rows carry a distance and the nearest come first;
   // otherwise they stay newest first, as the server sent them.
-  const rows = useMemo(() => {
+  const rows = useMemo((): { save: PoolSave; metres: number | null }[] => {
     if (here.status !== "on") return inCity.map((save) => ({ save, metres: null }));
     return inCity
       .map((save) => ({ save, metres: metresBetween(here, save) }))
       .sort((a, b) => a.metres - b.metres);
   }, [inCity, here]);
+
+  // Everything, newest first, reads as noise across cities, so it is grouped
+  // under each city, biggest first. Nearest first and a single city stay flat.
+  const groups = useMemo((): [string | null, typeof rows][] => {
+    if (city || here.status === "on") return [[null, rows]];
+    const byCity = new Map<string, typeof rows>();
+    for (const row of rows) {
+      const c = row.save.city ?? "Elsewhere";
+      const group = byCity.get(c);
+      if (group) group.push(row);
+      else byCity.set(c, [row]);
+    }
+    return [...byCity].sort((a, b) => b[1].length - a[1].length);
+  }, [rows, city, here.status]);
+
+  // Who added a place only matters once more than one of us is adding.
+  const manyPeople = useMemo(() => new Set(saves.map((s) => s.addedBy)).size > 1, [saves]);
 
   const filtered = Boolean(category || status);
   const selected = saves.find((s) => s.id === selectedId) ?? null;
@@ -176,6 +193,17 @@ export default function PoolView({
   function placeAdded(save: PoolSave, existed: boolean) {
     if (!existed) setSaves((all) => [save, ...all]);
     if (city && (save.city ?? "Elsewhere") !== city) setCity(null);
+    select(save.id);
+  }
+
+  // A place found in search may be outside the current city or filters; widen
+  // them so its pin is on the map.
+  function openSave(save: PoolSave) {
+    if (city && (save.city ?? "Elsewhere") !== city) setCity(null);
+    if (category && (category === "unsorted" ? save.category : save.category !== category)) {
+      setCategoryFilter(null);
+    }
+    if (status && save.status !== status) setStatusFilter(null);
     select(save.id);
   }
 
@@ -243,8 +271,8 @@ export default function PoolView({
   const onSearchOpen = useCallback((open: boolean) => setSearching(open), []);
 
   return (
-    <div className="relative h-dvh overflow-hidden bg-grouped lg:mt-[52px] lg:flex lg:h-[calc(100dvh-52px)]">
-      <div className="absolute inset-0 lg:static lg:order-2 lg:flex-1">
+    <div className="relative h-dvh overflow-hidden bg-grouped">
+      <div className="absolute inset-0">
         {mapboxToken ? (
           <PoolMap
             token={mapboxToken}
@@ -252,6 +280,7 @@ export default function PoolView({
             selectedId={selectedId}
             hoveredId={hoveredId}
             bottomInset={desktop ? 0 : detentHeight("half", viewport)}
+            leftInset={desktop ? 424 : 0}
             moving={moving}
             onSelect={select}
             onMove={movePin}
@@ -270,10 +299,56 @@ export default function PoolView({
           selected ? null : (
             <div className="px-4 pb-3">
               <div className="flex items-baseline justify-between gap-3 pb-2.5">
-                <h1 className="truncate text-[22px] font-bold tracking-[-0.01em]">{title}</h1>
+                {/* The title is the city picker: our space's name for everything,
+                    or the city we are looking at. */}
+                <h1 className="min-w-0 text-[22px] font-bold tracking-[-0.01em]">
+                  <label className="relative inline-flex max-w-full cursor-pointer items-baseline gap-1.5">
+                    <select
+                      aria-label="City"
+                      value={city ?? ""}
+                      onChange={(e) => setCity(e.target.value || null)}
+                      className="absolute inset-0 cursor-pointer appearance-none opacity-0"
+                    >
+                      <option value="">
+                        {title} · {matching.length}
+                      </option>
+                      {cities.map(([c, n]) => (
+                        <option key={c} value={c}>
+                          {c} · {n}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="truncate" aria-hidden>
+                      {city ?? title}
+                    </span>
+                    <span className="text-[15px] font-normal tracking-normal text-secondary tabular-nums" aria-hidden>
+                      {inCity.length}
+                    </span>
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="pointer-events-none shrink-0 self-center text-secondary"
+                      aria-hidden
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </label>
+                </h1>
                 {nav}
               </div>
-              <PlaceSearch near={near} onAdded={placeAdded} onOpenChange={onSearchOpen} />
+              <PlaceSearch
+                near={near}
+                saves={saves}
+                onAdded={placeAdded}
+                onPick={openSave}
+                onOpenChange={onSearchOpen}
+              />
             </div>
           )
         }
@@ -297,46 +372,8 @@ export default function PoolView({
           />
         ) : searching ? null : (
           <>
-            <div className="flex items-center gap-2 px-4 pb-2.5">
-              <label className="relative inline-flex h-9 min-w-0 items-center rounded-full control pr-8 pl-3.5 text-[15px] font-semibold">
-                <select
-                  aria-label="City"
-                  value={city ?? ""}
-                  onChange={(e) => setCity(e.target.value || null)}
-                  className="absolute inset-0 cursor-pointer appearance-none opacity-0"
-                >
-                  <option value="">All places · {matching.length}</option>
-                  {cities.map(([c, n]) => (
-                    <option key={c} value={c}>
-                      {c} · {n}
-                    </option>
-                  ))}
-                </select>
-                <span className="truncate" aria-hidden>
-                  {city ?? "All places"}
-                </span>
-                <span className="pl-1.5 font-normal text-secondary tabular-nums" aria-hidden>
-                  {inCity.length}
-                </span>
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="pointer-events-none absolute right-3 text-secondary"
-                  aria-hidden
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </label>
-            </div>
-
             <div
-              className="flex gap-2 overflow-x-auto px-4 pb-3 [scrollbar-width:none] lg:flex-wrap"
+              className="flex gap-2 overflow-x-auto px-4 pb-3 [scrollbar-width:none]"
               role="group"
               aria-label="Filter"
             >
@@ -363,23 +400,28 @@ export default function PoolView({
                 </Chip>
               ))}
               <span className="my-2 w-px shrink-0 bg-separator" aria-hidden />
-              {CATEGORIES.map((c) => (
+              {/* On a laptop the categories fold into one menu, so every filter
+                  fits on one line; a phone keeps the swipeable chips. */}
+              <CategoryMenu value={category} onChange={setCategoryFilter} />
+              <div className="contents lg:hidden">
+                {CATEGORIES.map((c) => (
+                  <Chip
+                    key={c}
+                    color={CATEGORY_COLOR[c]}
+                    active={category === c}
+                    onClick={() => setCategoryFilter(category === c ? null : c)}
+                  >
+                    {CATEGORY_LABEL[c]}
+                  </Chip>
+                ))}
                 <Chip
-                  key={c}
-                  color={CATEGORY_COLOR[c]}
-                  active={category === c}
-                  onClick={() => setCategoryFilter(category === c ? null : c)}
+                  color={UNSORTED_COLOR}
+                  active={category === "unsorted"}
+                  onClick={() => setCategoryFilter(category === "unsorted" ? null : "unsorted")}
                 >
-                  {CATEGORY_LABEL[c]}
+                  Unsorted
                 </Chip>
-              ))}
-              <Chip
-                color={UNSORTED_COLOR}
-                active={category === "unsorted"}
-                onClick={() => setCategoryFilter(category === "unsorted" ? null : "unsorted")}
-              >
-                Unsorted
-              </Chip>
+              </div>
             </div>
 
             {(here.status === "denied" || here.status === "unavailable") && (
@@ -413,50 +455,104 @@ export default function PoolView({
                 )}
               </div>
             ) : (
-              <ul className="border-t border-separator" onMouseLeave={() => setHoveredId(null)}>
-                {rows.map(({ save: s, metres }) => (
-                  <li key={s.id}>
-                    <button
-                      onClick={() => select(s.id)}
-                      onMouseEnter={() => setHoveredId(s.id)}
-                      onFocus={() => setHoveredId(s.id)}
-                      onBlur={() => setHoveredId(null)}
-                      className="flex w-full items-stretch text-left hover:bg-grouped focus-visible:bg-grouped focus-visible:outline-offset-[-2px] active:bg-fill"
-                    >
-                      <span className="flex w-10 shrink-0 items-center justify-center pl-1">
-                        <span
-                          className="dot h-3 w-3 rounded-full"
-                          style={
-                            {
-                              "--dot": s.category ? CATEGORY_COLOR[s.category] : UNSORTED_COLOR,
-                            } as React.CSSProperties
-                          }
-                          aria-hidden
-                        />
-                      </span>
-                      <span className="flex min-h-14 min-w-0 flex-1 items-center gap-3 border-b border-separator py-2 pr-4 lg:min-h-12 lg:py-1.5">
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[17px] leading-snug">{s.name}</span>
-                          <span className="block truncate text-[15px] leading-snug text-secondary">
-                            {[
-                              s.category ? CATEGORY_LABEL[s.category] : "Unsorted",
-                              s.status === "been" ? "Been" : null,
-                              city ? null : (s.city ?? "Elsewhere"),
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")}
+              <div onMouseLeave={() => setHoveredId(null)}>
+                <p className="px-4 pb-1.5 text-[13px] text-secondary" role="status">
+                  {rows.length} {rows.length === 1 ? "place" : "places"} ·{" "}
+                  {here.status === "on" ? "nearest first" : "newest first"}
+                </p>
+                {groups.map(([name, groupRows]) => (
+                  <section key={name ?? "all"} aria-label={name ?? undefined}>
+                    {name && (
+                      // Sticky only on a laptop: inside the phone's frosted
+                      // sheet a header can't blur what scrolls under it.
+                      <h2 className="flex items-baseline justify-between border-t border-separator px-4 pt-2.5 pb-1.5 text-[15px] font-semibold lg:sticky lg:top-0 lg:z-[1] lg:bg-background/90 lg:text-[13px] lg:backdrop-blur-md">
+                        {name}
+                        <span className="font-normal text-secondary tabular-nums">{groupRows.length}</span>
+                      </h2>
+                    )}
+                    <ul className={name ? undefined : "border-t border-separator"}>
+                    {groupRows.map(({ save: s, metres }) => (
+                      <li key={s.id}>
+                        <button
+                          onClick={() => select(s.id)}
+                          onMouseEnter={() => setHoveredId(s.id)}
+                          onFocus={() => setHoveredId(s.id)}
+                          onBlur={() => setHoveredId(null)}
+                          className="flex w-full items-stretch text-left hover:bg-grouped focus-visible:bg-grouped focus-visible:outline-offset-[-2px] active:bg-fill"
+                        >
+                          <span className="flex w-10 shrink-0 items-center justify-center pl-1">
+                            <span
+                              className="dot h-3 w-3 rounded-full"
+                              style={
+                                {
+                                  "--dot": s.category ? CATEGORY_COLOR[s.category] : UNSORTED_COLOR,
+                                } as React.CSSProperties
+                              }
+                              aria-hidden
+                            />
                           </span>
-                        </span>
-                        {metres !== null && (
-                          <span className="shrink-0 text-[15px] text-secondary tabular-nums">
-                            {formatDistance(metres)}
+                          <span className="flex min-h-14 min-w-0 flex-1 items-center gap-3 border-b border-separator py-2 pr-4 lg:min-h-11 lg:py-1">
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-[17px] leading-snug lg:text-[15px]">
+                                {s.name}
+                              </span>
+                              {/* Our layer first: why we saved it, else who told us.
+                                  The dot already shows the category, so it is only
+                                  spelled out when there is nothing of ours to say. */}
+                              <span className="block truncate text-[15px] leading-snug text-secondary lg:text-[13px]">
+                                {s.why || s.via ? (
+                                  <>
+                                    <span className="sr-only">
+                                      {s.category ? CATEGORY_LABEL[s.category] : "Unsorted"}.{" "}
+                                    </span>
+                                    {s.why ?? `via ${s.via}`}
+                                  </>
+                                ) : (
+                                  [
+                                    s.category ? CATEGORY_LABEL[s.category] : "Unsorted",
+                                    name || city ? null : (s.city ?? "Elsewhere"),
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" · ")
+                                )}
+                              </span>
+                            </span>
+                            <span className="flex shrink-0 items-center gap-2 text-[15px] text-secondary tabular-nums lg:text-[13px]">
+                              {metres !== null && formatDistance(metres)}
+                              {s.status === "been" && (
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.6"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  role="img"
+                                  aria-label="Been"
+                                >
+                                  <path d="m5 12.5 4.500 4.500L19 7.500" />
+                                </svg>
+                              )}
+                              {manyPeople && (
+                                <span
+                                  className="flex h-5 w-5 items-center justify-center rounded-full bg-fill text-[11px] font-semibold"
+                                  title={`Added by ${s.addedBy}`}
+                                >
+                                  <span aria-hidden>{s.addedBy.slice(0, 1).toUpperCase()}</span>
+                                  <span className="sr-only">Added by {s.addedBy}</span>
+                                </span>
+                              )}
+                            </span>
                           </span>
-                        )}
-                      </span>
-                    </button>
-                  </li>
+                        </button>
+                      </li>
+                    ))}
+                    </ul>
+                  </section>
                 ))}
-              </ul>
+              </div>
             )}
 
             <div className="flex justify-center px-4 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
@@ -552,7 +648,7 @@ function Sheet({
   return (
     <div
       ref={sheet}
-      className="fixed inset-x-0 bottom-0 z-10 flex h-[calc(100dvh-48px)] flex-col rounded-t-sheet max-lg:material lg:bg-background lg:[background-image:var(--column)] max-lg:[transform:translateY(var(--sheet-y))] motion-safe:transition-transform motion-safe:duration-[420ms] motion-safe:ease-[cubic-bezier(0.32,0.72,0,1)] lg:static lg:order-1 lg:h-full lg:w-[400px] lg:shrink-0 lg:rounded-none lg:border-r lg:border-separator lg:shadow-none"
+      className="fixed inset-x-0 bottom-0 z-10 flex h-[calc(100dvh-48px)] flex-col rounded-t-sheet material lg:floating lg:bg-background/95 max-lg:[transform:translateY(var(--sheet-y))] motion-safe:transition-transform motion-safe:duration-[420ms] motion-safe:ease-[cubic-bezier(0.32,0.72,0,1)] lg:absolute lg:inset-x-auto lg:bottom-3 lg:left-3 lg:top-16 lg:h-auto lg:w-[400px] lg:overflow-hidden lg:rounded-sheet"
       style={{ "--sheet-y": REST[detent] } as React.CSSProperties}
     >
       <div
@@ -605,7 +701,7 @@ function Chip({
     <button
       onClick={onClick}
       aria-pressed={active}
-      className="group flex h-9 shrink-0 items-center gap-1.5 rounded-full control px-3.5 text-[15px] font-medium aria-pressed:pressed"
+      className="group flex h-9 shrink-0 items-center gap-1.5 rounded-full control px-3.5 text-[15px] font-medium aria-pressed:pressed lg:h-8 lg:px-3 lg:text-[13px]"
     >
       {color && (
         <span
@@ -616,6 +712,63 @@ function Chip({
       )}
       {children}
     </button>
+  );
+}
+
+// The laptop's category filter: a chip that opens the system menu, filled
+// blue with the category's dot once one is picked.
+function CategoryMenu({
+  value,
+  onChange,
+}: {
+  value: Category | "unsorted" | null;
+  onChange: (value: Category | "unsorted" | null) => void;
+}) {
+  const color = value === "unsorted" ? UNSORTED_COLOR : value ? CATEGORY_COLOR[value] : null;
+  return (
+    <label
+      data-active={value ? "" : undefined}
+      className="relative hidden h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-full control pr-2.5 pl-3 text-[13px] font-medium data-active:pressed lg:flex"
+    >
+      <select
+        aria-label="Category"
+        value={value ?? ""}
+        onChange={(e) => onChange((e.target.value || null) as Category | "unsorted" | null)}
+        className="absolute inset-0 cursor-pointer appearance-none opacity-0"
+      >
+        <option value="">All categories</option>
+        {CATEGORIES.map((c) => (
+          <option key={c} value={c}>
+            {CATEGORY_LABEL[c]}
+          </option>
+        ))}
+        <option value="unsorted">Unsorted</option>
+      </select>
+      {color && (
+        <span
+          className="dot h-2.5 w-2.5 rounded-full ring-[1.5px] ring-white"
+          style={{ "--dot": color } as React.CSSProperties}
+          aria-hidden
+        />
+      )}
+      <span aria-hidden>
+        {value === "unsorted" ? "Unsorted" : value ? CATEGORY_LABEL[value] : "Category"}
+      </span>
+      <svg
+        width="11"
+        height="11"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="pointer-events-none opacity-60"
+        aria-hidden
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </label>
   );
 }
 
